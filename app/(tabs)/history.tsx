@@ -119,7 +119,6 @@ export default function HistoryScreen() {
 
       <FlashList
         data={scans}
-        estimatedItemSize={80}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <ScanItem

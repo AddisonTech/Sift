@@ -14,6 +14,14 @@ export default function RootLayout() {
   const segments = useSegments();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+  // navigatorReady defers redirects until after the first render cycle,
+  // ensuring expo-router's navigator is mounted before any replace() call.
+  const [navigatorReady, setNavigatorReady] = useState(false);
+
+  useEffect(() => {
+    // Mark navigator as ready after the first render
+    setNavigatorReady(true);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -32,7 +40,8 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (session === undefined || onboardingDone === null) return;
+    // Wait until all async state is resolved and the navigator is mounted
+    if (session === undefined || onboardingDone === null || !navigatorReady) return;
 
     const inAuth = segments[0] === '(auth)';
     const inOnboarding = segments[0] === '(onboarding)';
@@ -50,7 +59,7 @@ export default function RootLayout() {
     if (inAuth || inOnboarding) {
       router.replace('/(tabs)');
     }
-  }, [session, onboardingDone, segments]);
+  }, [session, onboardingDone, segments, navigatorReady]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

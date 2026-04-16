@@ -6,7 +6,7 @@ export interface SiftCameraRef {
   capturePhoto: () => Promise<string>;
 }
 
-const SiftCamera = React.forwardRef<SiftCameraRef, Record<string, never>>(
+const SiftCamera = React.forwardRef<SiftCameraRef, object>(
   (_props, ref) => {
     const cameraRef = useRef<CameraView>(null);
     const [permission, requestPermission] = useCameraPermissions();
