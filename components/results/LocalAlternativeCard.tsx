@@ -11,45 +11,69 @@ function StarRating({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5;
   return (
-    <View className="flex-row items-center">
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 1 }}>
       {Array.from({ length: 5 }, (_, i) => (
         <Text
           key={i}
-          style={{ fontSize: 10, color: i < full || (i === full && half) ? '#FFB300' : '#2A2A2A' }}
+          style={{
+            fontSize: 10,
+            color: i < full || (i === full && half) ? '#FFB300' : '#222222',
+          }}
         >
           ★
         </Text>
       ))}
-      <Text className="text-muted text-xs ml-1">{rating.toFixed(1)}</Text>
+      <Text style={{ color: '#555555', fontSize: 10, marginLeft: 3 }}>{rating.toFixed(1)}</Text>
     </View>
-  );
-}
-
-function PriceLevel({ level }: { level: number }) {
-  return (
-    <Text className="text-muted text-xs">
-      {'$'.repeat(Math.min(level, 4))}
-      <Text style={{ color: '#2A2A2A' }}>{'$'.repeat(Math.max(0, 4 - level))}</Text>
-    </Text>
   );
 }
 
 export default function LocalAlternativeCard({ alternative }: LocalAlternativeCardProps) {
   return (
     <View
-      className="bg-card border border-border rounded-2xl p-4 mr-3"
-      style={{ width: 180 }}
+      style={{
+        backgroundColor: '#111111',
+        borderWidth: 1,
+        borderColor: '#1E1E1E',
+        borderRadius: 16,
+        padding: 14,
+        marginRight: 10,
+        width: 172,
+      }}
     >
-      <Text className="text-text font-semibold text-sm mb-1 leading-tight" numberOfLines={2}>
+      <Text
+        style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 13, marginBottom: 4, lineHeight: 18 }}
+        numberOfLines={2}
+      >
         {alternative.name}
       </Text>
-      <Text className="text-accent text-xs mb-2">{formatDistance(alternative.distance_km)}</Text>
-      <Text className="text-muted text-xs mb-2 leading-tight" numberOfLines={2}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+        <View
+          style={{
+            backgroundColor: 'rgba(0,209,255,0.1)',
+            borderRadius: 99,
+            paddingHorizontal: 7,
+            paddingVertical: 2,
+          }}
+        >
+          <Text style={{ color: '#00D1FF', fontSize: 10, fontWeight: '600' }}>
+            {formatDistance(alternative.distance_km)}
+          </Text>
+        </View>
+      </View>
+      <Text
+        style={{ color: '#444444', fontSize: 11, lineHeight: 16, marginBottom: 8 }}
+        numberOfLines={2}
+      >
         {alternative.address}
       </Text>
-      <View className="flex-row items-center justify-between">
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         {alternative.rating !== null && <StarRating rating={alternative.rating} />}
-        {alternative.price_level !== null && <PriceLevel level={alternative.price_level} />}
+        {alternative.price_level !== null && (
+          <Text style={{ color: '#555555', fontSize: 11 }}>
+            {'$'.repeat(Math.min(alternative.price_level, 4))}
+          </Text>
+        )}
       </View>
     </View>
   );

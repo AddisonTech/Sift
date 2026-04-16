@@ -15,32 +15,70 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
   };
 
   return (
-    <View className="bg-card border border-border rounded-2xl p-4 mb-3 mx-4 flex-row items-center">
+    <View
+      style={{
+        backgroundColor: '#111111',
+        borderWidth: 1,
+        borderColor: '#1E1E1E',
+        borderRadius: 16,
+        padding: 14,
+        marginBottom: 10,
+        marginHorizontal: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
       {alternative.image_url ? (
         <Image
           source={{ uri: alternative.image_url }}
-          className="w-14 h-14 rounded-xl mr-3 bg-surface"
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 10,
+            marginRight: 14,
+            backgroundColor: '#1A1A1A',
+          }}
           resizeMode="cover"
         />
       ) : (
-        <View className="w-14 h-14 rounded-xl mr-3 bg-surface items-center justify-center">
+        <View
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 10,
+            marginRight: 14,
+            backgroundColor: '#1A1A1A',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <Text style={{ fontSize: 22 }}>🛍️</Text>
         </View>
       )}
-      <View className="flex-1 mr-3">
-        <Text className="text-text font-semibold text-sm mb-0.5 leading-tight" numberOfLines={2}>
+
+      <View style={{ flex: 1, marginRight: 12 }}>
+        <Text
+          style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 13, lineHeight: 18, marginBottom: 2 }}
+          numberOfLines={2}
+        >
           {alternative.name}
         </Text>
-        <Text className="text-muted text-xs mb-1">{alternative.merchant}</Text>
-        <Text className="text-success font-bold text-sm">
+        <Text style={{ color: '#444444', fontSize: 11, marginBottom: 4 }}>{alternative.merchant}</Text>
+        <Text style={{ color: '#00E676', fontWeight: '700', fontSize: 14 }}>
           {formatPrice(alternative.price, alternative.currency)}
         </Text>
       </View>
+
       <Pressable
         onPress={handleView}
-        className="bg-primary/20 border border-primary/40 rounded-xl px-3 py-2"
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? 'rgba(108,71,255,0.25)' : 'rgba(108,71,255,0.12)',
+          borderRadius: 10,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+        })}
       >
-        <Text className="text-primary text-xs font-semibold">View</Text>
+        <Text style={{ color: '#6C47FF', fontSize: 12, fontWeight: '700' }}>View</Text>
       </Pressable>
     </View>
   );

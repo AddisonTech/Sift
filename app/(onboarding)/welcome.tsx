@@ -2,12 +2,14 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleSkip = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
@@ -19,44 +21,101 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+      {/* Background glow */}
       <LinearGradient
-        colors={['#6C47FF18', '#00D1FF08', '#0A0A0A']}
-        locations={[0, 0.4, 1]}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        colors={['#6C47FF20', '#6C47FF08', '#0A0A0A00']}
+        locations={[0, 0.5, 1]}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60%' }}
+        pointerEvents="none"
+      />
+      <LinearGradient
+        colors={['#0A0A0A00', '#00D1FF08', '#0A0A0A00']}
+        style={{ position: 'absolute', top: '25%', left: 0, right: 0, height: '40%' }}
+        pointerEvents="none"
       />
 
+      {/* Skip */}
       <Pressable
         onPress={handleSkip}
-        className="absolute top-14 right-6 z-10"
-        hitSlop={12}
+        style={{ position: 'absolute', top: insets.top + 16, right: 20 }}
+        hitSlop={16}
       >
-        <Text className="text-muted text-sm font-medium">Skip</Text>
+        <Text style={{ color: '#333333', fontSize: 14, fontWeight: '500' }}>Skip</Text>
       </Pressable>
 
-      <View className="flex-1 justify-end px-6 pb-16">
+      {/* Content */}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'flex-end',
+          paddingHorizontal: 28,
+          paddingBottom: insets.bottom + 36,
+        }}
+      >
+        {/* Dot accent */}
+        <View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: '#6C47FF',
+            marginBottom: 20,
+            shadowColor: '#6C47FF',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 14,
+            elevation: 10,
+          }}
+        />
+
         <Text
           style={{
             color: '#FFFFFF',
             fontSize: 42,
-            fontWeight: '800',
-            lineHeight: 50,
+            fontWeight: '900',
+            lineHeight: 48,
             letterSpacing: -1.5,
-            marginBottom: 16,
+            marginBottom: 14,
           }}
         >
           Your personal{'\n'}decision engine.
         </Text>
-        <Text className="text-muted text-base leading-relaxed mb-12" style={{ maxWidth: 300 }}>
-          Point your camera at anything. Get a score, a verdict, and smarter alternatives.
+        <Text
+          style={{
+            color: '#444444',
+            fontSize: 15,
+            lineHeight: 24,
+            marginBottom: 36,
+            maxWidth: 300,
+          }}
+        >
+          Point your camera at anything — food, products, restaurants. Get a score, a verdict, and smarter alternatives.
         </Text>
 
+        {/* CTAs */}
         <Pressable
           onPress={handleGetStarted}
-          className="bg-primary rounded-xl py-4 items-center"
-          style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#5A38E8' : '#6C47FF',
+            borderRadius: 14,
+            paddingVertical: 16,
+            alignItems: 'center',
+            marginBottom: 12,
+            shadowColor: '#6C47FF',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: pressed ? 0.2 : 0.35,
+            shadowRadius: 16,
+            elevation: 8,
+          })}
         >
-          <Text className="text-text font-bold text-base">Get Started</Text>
+          <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
+            Personalize Sift
+          </Text>
+        </Pressable>
+
+        <Pressable onPress={handleSkip} style={{ alignItems: 'center', paddingVertical: 12 }}>
+          <Text style={{ color: '#333333', fontSize: 14 }}>Use default settings</Text>
         </Pressable>
       </View>
     </View>

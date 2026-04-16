@@ -7,6 +7,7 @@ import {
   Share,
   ActivityIndicator,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -25,34 +26,24 @@ import LocalAlternativeCard from '../../components/results/LocalAlternativeCard'
 import OnlineAlternativeCard from '../../components/results/OnlineAlternativeCard';
 import type { ScanResult } from '../../lib/types';
 
-function AnimatedScore({ score }: { score: number }) {
+function AnimatedScore({ score, color }: { score: number; color: string }) {
   const [displayed, setDisplayed] = useState(0);
 
   useEffect(() => {
-    let start = 0;
-    const duration = 600;
+    const duration = 700;
     const startTime = Date.now();
     const tick = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(eased * score);
-      setDisplayed(current);
+      setDisplayed(Math.round(eased * score));
       if (progress < 1) requestAnimationFrame(tick);
     };
-    const raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    requestAnimationFrame(tick);
   }, [score]);
 
   return (
-    <Text
-      style={{
-        fontSize: 48,
-        fontWeight: '800',
-        color: '#FFFFFF',
-        letterSpacing: -2,
-      }}
-    >
+    <Text style={{ fontSize: 52, fontWeight: '900', color, letterSpacing: -2, lineHeight: 56 }}>
       {displayed}
     </Text>
   );
@@ -71,8 +62,10 @@ export default function ResultsScreen() {
   const [loading, setLoading] = useState(true);
 
   const contentOpacity = useSharedValue(0);
+  const contentTranslate = useSharedValue(16);
   const contentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
+    transform: [{ translateY: contentTranslate.value }],
   }));
 
   useEffect(() => {
@@ -105,7 +98,6 @@ export default function ResultsScreen() {
             location_lng: data.location_lng,
             created_at: data.created_at,
           };
-
           if (data.raw_response?.score_breakdown) {
             setBreakdown(data.raw_response.score_breakdown);
           }
@@ -114,7 +106,8 @@ export default function ResultsScreen() {
 
       setScan(found);
       setLoading(false);
-      contentOpacity.value = withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) });
+      contentOpacity.value = withTiming(1, { duration: 380, easing: Easing.out(Easing.cubic) });
+      contentTranslate.value = withTiming(0, { duration: 380, easing: Easing.out(Easing.cubic) });
     }
 
     loadScan();
@@ -123,13 +116,13 @@ export default function ResultsScreen() {
   const handleShare = async () => {
     if (!scan) return;
     await Share.share({
-      message: `I scanned "${scan.item_name}" with Sift — score: ${scan.score}/100, verdict: ${scan.verdict}. "${scan.reasoning}"`,
+      message: `I scanned "${scan.item_name}" with Sift — ${scan.score}/100 · ${scan.verdict.toUpperCase()}. "${scan.reasoning}"`,
     });
   };
 
   if (loading) {
     return (
-      <View className="flex-1 bg-background items-center justify-center">
+      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" color="#6C47FF" />
       </View>
     );
@@ -137,10 +130,12 @@ export default function ResultsScreen() {
 
   if (!scan) {
     return (
-      <View className="flex-1 bg-background items-center justify-center px-8">
-        <Text className="text-text text-lg font-bold mb-2">Scan not found</Text>
-        <Pressable onPress={() => router.back()} className="mt-4">
-          <Text className="text-primary text-sm">Go back</Text>
+      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '700', marginBottom: 8 }}>
+          Scan not found
+        </Text>
+        <Pressable onPress={() => router.back()}>
+          <Text style={{ color: '#6C47FF', fontSize: 14 }}>Go back</Text>
         </Pressable>
       </View>
     );
@@ -149,40 +144,80 @@ export default function ResultsScreen() {
   const color = verdictColor(scan.verdict);
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+      {/* Ambient verdict color glow at top */}
+      <LinearGradient
+        colors={[`${color}1A`, `${color}06`, '#0A0A0A00']}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 320 }}
+        pointerEvents="none"
+      />
+
       <Animated.ScrollView
         style={[{ flex: 1 }, contentStyle]}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        showsVerticalScrollIndicator={false}
       >
+        {/* ── Hero ── */}
         <View
-          className="items-center px-6"
-          style={{ paddingTop: insets.top + 24, paddingBottom: 32 }}
+          style={{
+            alignItems: 'center',
+            paddingTop: insets.top + 32,
+            paddingBottom: 32,
+            paddingHorizontal: 24,
+          }}
         >
-          <View className="relative items-center justify-center" style={{ width: 180, height: 180 }}>
+          {/* Score ring */}
+          <View style={{ position: 'relative', marginBottom: 20 }}>
             <ScoreRing score={scan.score} size={180} />
-            <View className="absolute items-center">
-              <AnimatedScore score={scan.score} />
-              <Text className="text-muted text-xs font-medium">/ 100</Text>
+            <View
+              style={{
+                position: 'absolute',
+                inset: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <AnimatedScore score={scan.score} color={color} />
+              <Text style={{ color: '#333333', fontSize: 12, fontWeight: '600', marginTop: -2 }}>
+                / 100
+              </Text>
             </View>
           </View>
 
-          <View className="mt-5 items-center">
-            <VerdictBadge verdict={scan.verdict} />
-            <Text
-              className="text-text font-bold text-center mt-3"
-              style={{ fontSize: 22, letterSpacing: -0.5, lineHeight: 28 }}
-              numberOfLines={2}
-            >
-              {scan.item_name}
-            </Text>
-          </View>
+          <VerdictBadge verdict={scan.verdict} />
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontWeight: '800',
+              fontSize: 22,
+              letterSpacing: -0.5,
+              lineHeight: 28,
+              textAlign: 'center',
+              marginTop: 14,
+            }}
+            numberOfLines={2}
+          >
+            {scan.item_name}
+          </Text>
         </View>
 
+        {/* ── Reasoning ── */}
         <ReasoningCard scan={scan} breakdown={breakdown} />
 
+        {/* ── Local alternatives ── */}
         {scan.local_alternatives.length > 0 && (
-          <View className="mb-4">
-            <Text className="text-muted text-xs font-semibold uppercase tracking-wider px-4 mb-3">
+          <View style={{ marginBottom: 16 }}>
+            <Text
+              style={{
+                color: '#333333',
+                fontSize: 10,
+                fontWeight: '700',
+                letterSpacing: 1.5,
+                textTransform: 'uppercase',
+                paddingHorizontal: 20,
+                marginBottom: 12,
+              }}
+            >
               Nearby
             </Text>
             <ScrollView
@@ -197,9 +232,20 @@ export default function ResultsScreen() {
           </View>
         )}
 
+        {/* ── Online alternatives ── */}
         {scan.online_alternatives.length > 0 && (
-          <View className="mb-4">
-            <Text className="text-muted text-xs font-semibold uppercase tracking-wider px-4 mb-3">
+          <View style={{ marginBottom: 16 }}>
+            <Text
+              style={{
+                color: '#333333',
+                fontSize: 10,
+                fontWeight: '700',
+                letterSpacing: 1.5,
+                textTransform: 'uppercase',
+                paddingHorizontal: 20,
+                marginBottom: 12,
+              }}
+            >
               Online
             </Text>
             {scan.online_alternatives.map((alt) => (
@@ -209,25 +255,47 @@ export default function ResultsScreen() {
         )}
       </Animated.ScrollView>
 
+      {/* ── Bottom action bar ── */}
       <View
-        className="absolute bottom-0 left-0 right-0 flex-row px-4 gap-3 bg-background/95"
-        style={{ paddingBottom: insets.bottom + 12, paddingTop: 12, borderTopColor: '#2A2A2A', borderTopWidth: 1 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          flexDirection: 'row',
+          paddingHorizontal: 16,
+          gap: 10,
+          paddingBottom: insets.bottom + 14,
+          paddingTop: 14,
+          borderTopWidth: 1,
+          borderTopColor: '#141414',
+          backgroundColor: 'rgba(10,10,10,0.96)',
+        }}
       >
         <Pressable
           onPress={() => router.replace('/(tabs)')}
-          className="flex-1 bg-surface border border-border rounded-xl py-3.5 items-center"
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          style={({ pressed }) => ({
+            flex: 1,
+            backgroundColor: pressed ? '#1A1A1A' : '#141414',
+            borderWidth: 1,
+            borderColor: '#252525',
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
+          })}
         >
-          <Text className="text-text font-semibold text-sm">Scan Again</Text>
+          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>Scan Again</Text>
         </Pressable>
         <Pressable
           onPress={handleShare}
-          className="flex-1 rounded-xl py-3.5 items-center"
           style={({ pressed }) => ({
-            backgroundColor: `${color}22`,
-            borderColor: `${color}55`,
+            flex: 1,
+            backgroundColor: pressed ? `${color}30` : `${color}18`,
             borderWidth: 1,
-            opacity: pressed ? 0.7 : 1,
+            borderColor: `${color}40`,
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
           })}
         >
           <Text style={{ color, fontWeight: '600', fontSize: 14 }}>Share</Text>

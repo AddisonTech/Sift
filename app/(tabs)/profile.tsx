@@ -20,12 +20,13 @@ const WEIGHT_FIELDS: {
   key: keyof Pick<UserPreferences, 'price_weight' | 'quality_weight' | 'ethics_weight' | 'health_weight' | 'speed_weight'>;
   label: string;
   icon: string;
+  description: string;
 }[] = [
-  { key: 'price_weight', label: 'Price', icon: '💰' },
-  { key: 'quality_weight', label: 'Quality', icon: '⭐' },
-  { key: 'ethics_weight', label: 'Ethics', icon: '🌱' },
-  { key: 'health_weight', label: 'Health', icon: '💪' },
-  { key: 'speed_weight', label: 'Speed', icon: '⚡' },
+  { key: 'price_weight', label: 'Price', icon: '💰', description: 'How much cost matters' },
+  { key: 'quality_weight', label: 'Quality', icon: '⭐', description: 'Build quality & durability' },
+  { key: 'ethics_weight', label: 'Ethics', icon: '🌱', description: 'Sustainability & sourcing' },
+  { key: 'health_weight', label: 'Health', icon: '💪', description: 'Nutritional & health impact' },
+  { key: 'speed_weight', label: 'Speed', icon: '⚡', description: 'Convenience & accessibility' },
 ];
 
 const BUDGET_OPTIONS: { value: UserPreferences['budget']; label: string }[] = [
@@ -41,15 +42,42 @@ const DISTANCE_OPTIONS: { value: number; label: string }[] = [
   { value: 40, label: '25 mi' },
 ];
 
-const DIETARY_OPTIONS = [
-  'Vegan',
-  'Vegetarian',
-  'Gluten-Free',
-  'Dairy-Free',
-  'Halal',
-  'Kosher',
-  'Nut-Free',
-];
+const DIETARY_OPTIONS = ['Vegan', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Halal', 'Kosher', 'Nut-Free'];
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <View
+      style={{
+        backgroundColor: '#111111',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#1E1E1E',
+        overflow: 'hidden',
+        marginBottom: 12,
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
+function SectionLabel({ title }: { title: string }) {
+  return (
+    <Text
+      style={{
+        color: '#444444',
+        fontSize: 11,
+        fontWeight: '600',
+        letterSpacing: 1.2,
+        textTransform: 'uppercase',
+        marginBottom: 8,
+        paddingHorizontal: 4,
+      }}
+    >
+      {title}
+    </Text>
+  );
+}
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -70,17 +98,17 @@ export default function ProfileScreen() {
 
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? '');
-    });
-    supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
+        setEmail(data.user.email ?? '');
         supabase
           .from('profiles')
           .select('display_name')
           .eq('id', data.user.id)
           .single()
           .then(({ data: profile }) => {
-            setDisplayName(profile?.display_name ?? data.user?.user_metadata?.display_name ?? '');
+            setDisplayName(
+              profile?.display_name ?? data.user?.user_metadata?.display_name ?? '',
+            );
           });
       }
     });
@@ -102,168 +130,229 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-background"
+      style={{ flex: 1, backgroundColor: '#0A0A0A' }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 48 }}
+      showsVerticalScrollIndicator={false}
     >
-      <View className="px-6" style={{ paddingTop: insets.top + 16, paddingBottom: 24 }}>
-        <Text
-          style={{ fontSize: 28, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.8 }}
+      {/* Hero */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 20,
+          paddingBottom: 28,
+        }}
+      >
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            backgroundColor: '#1A1A1A',
+            borderWidth: 1,
+            borderColor: '#252525',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 14,
+          }}
         >
-          {displayName || 'Profile'}
+          <Text style={{ fontSize: 22 }}>
+            {displayName ? displayName[0].toUpperCase() : '?'}
+          </Text>
+        </View>
+        <Text style={{ fontSize: 26, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.8 }}>
+          {displayName || 'Guest'}
         </Text>
         {email ? (
-          <Text className="text-muted text-sm mt-1">{email}</Text>
+          <Text style={{ color: '#444444', fontSize: 13, marginTop: 3 }}>{email}</Text>
         ) : null}
       </View>
 
-      <View className="px-6 mb-2">
-        <Text className="text-muted text-xs font-semibold mb-4 uppercase tracking-wider">
-          Preferences
-        </Text>
-        {WEIGHT_FIELDS.map(({ key, label, icon }) => (
-          <View key={key} className="mb-5">
-            <View className="flex-row justify-between items-center mb-2">
-              <View className="flex-row items-center">
-                <Text style={{ fontSize: 15, marginRight: 8 }}>{icon}</Text>
-                <Text className="text-text font-medium text-sm">{label}</Text>
+      <View style={{ paddingHorizontal: 16 }}>
+
+        {/* ── Priorities ── */}
+        <SectionLabel title="Priorities" />
+        <SectionCard>
+          {WEIGHT_FIELDS.map(({ key, label, icon, description }, index) => (
+            <View
+              key={key}
+              style={{
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                borderBottomWidth: index < WEIGHT_FIELDS.length - 1 ? 1 : 0,
+                borderBottomColor: '#181818',
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                <Text style={{ fontSize: 14, marginRight: 8 }}>{icon}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>{label}</Text>
+                  <Text style={{ color: '#444444', fontSize: 11, marginTop: 1 }}>{description}</Text>
+                </View>
+                <Text style={{ color: '#6C47FF', fontWeight: '700', fontSize: 14 }}>
+                  {preferences[key]}
+                </Text>
               </View>
-              <Text className="text-primary font-bold text-sm">{preferences[key]}</Text>
+              <PreferenceSlider
+                value={preferences[key] as number}
+                onValueChange={(v) => debouncedUpdate({ [key]: v })}
+                min={1}
+                max={10}
+              />
             </View>
-            <PreferenceSlider
-              value={preferences[key] as number}
-              onValueChange={(v) => debouncedUpdate({ [key]: v })}
-              min={1}
-              max={10}
-            />
-          </View>
-        ))}
-      </View>
-
-      <View className="px-6 mb-6">
-        <Text className="text-muted text-xs font-semibold mb-3 uppercase tracking-wider">
-          Budget
-        </Text>
-        <View className="flex-row gap-2">
-          {BUDGET_OPTIONS.map(({ value, label }) => (
-            <Pressable
-              key={value}
-              onPress={() => updatePreferences({ budget: value })}
-              style={{
-                flex: 1,
-                backgroundColor: preferences.budget === value ? '#6C47FF' : '#1C1C1C',
-                borderColor: preferences.budget === value ? '#6C47FF' : '#2A2A2A',
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingVertical: 10,
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: preferences.budget === value ? '#FFFFFF' : '#9E9E9E',
-                  fontSize: 13,
-                  fontWeight: '600',
-                }}
-              >
-                {label}
-              </Text>
-            </Pressable>
           ))}
-        </View>
-      </View>
+        </SectionCard>
 
-      <View className="px-6 mb-6">
-        <Text className="text-muted text-xs font-semibold mb-3 uppercase tracking-wider">
-          Distance Radius
-        </Text>
-        <View className="flex-row gap-2">
-          {DISTANCE_OPTIONS.map(({ value, label }) => (
-            <Pressable
-              key={value}
-              onPress={() => updatePreferences({ distance_radius_km: value })}
-              style={{
-                flex: 1,
-                backgroundColor: preferences.distance_radius_km === value ? '#6C47FF' : '#1C1C1C',
-                borderColor: preferences.distance_radius_km === value ? '#6C47FF' : '#2A2A2A',
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingVertical: 10,
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{
-                  color: preferences.distance_radius_km === value ? '#FFFFFF' : '#9E9E9E',
-                  fontSize: 13,
-                  fontWeight: '600',
-                }}
-              >
-                {label}
-              </Text>
-            </Pressable>
-          ))}
+        {/* ── Budget ── */}
+        <View style={{ marginTop: 8, marginBottom: 12 }}>
+          <SectionLabel title="Budget" />
+          <SectionCard>
+            <View style={{ flexDirection: 'row', padding: 6 }}>
+              {BUDGET_OPTIONS.map(({ value, label }) => (
+                <Pressable
+                  key={value}
+                  onPress={() => updatePreferences({ budget: value })}
+                  style={{
+                    flex: 1,
+                    backgroundColor: preferences.budget === value ? '#6C47FF' : 'transparent',
+                    borderRadius: 10,
+                    paddingVertical: 10,
+                    alignItems: 'center',
+                    margin: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: preferences.budget === value ? '#FFFFFF' : '#555555',
+                      fontSize: 13,
+                      fontWeight: '600',
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </SectionCard>
         </View>
-      </View>
 
-      <View className="px-6 mb-6">
-        <Text className="text-muted text-xs font-semibold mb-3 uppercase tracking-wider">
-          Dietary
-        </Text>
-        <View className="flex-row flex-wrap gap-2">
-          {DIETARY_OPTIONS.map((tag) => {
-            const lower = tag.toLowerCase();
-            const active = preferences.dietary.includes(lower);
-            return (
+        {/* ── Distance ── */}
+        <SectionLabel title="Search Radius" />
+        <SectionCard>
+          <View style={{ flexDirection: 'row', padding: 6 }}>
+            {DISTANCE_OPTIONS.map(({ value, label }) => (
               <Pressable
-                key={tag}
-                onPress={() => toggleDietary(tag)}
+                key={value}
+                onPress={() => updatePreferences({ distance_radius_km: value })}
                 style={{
-                  backgroundColor: active ? '#6C47FF22' : '#1C1C1C',
-                  borderColor: active ? '#6C47FF88' : '#2A2A2A',
-                  borderWidth: 1,
-                  borderRadius: 999,
-                  paddingHorizontal: 14,
-                  paddingVertical: 7,
+                  flex: 1,
+                  backgroundColor: preferences.distance_radius_km === value ? '#6C47FF' : 'transparent',
+                  borderRadius: 10,
+                  paddingVertical: 10,
+                  alignItems: 'center',
+                  margin: 2,
                 }}
               >
                 <Text
                   style={{
-                    color: active ? '#6C47FF' : '#9E9E9E',
-                    fontSize: 13,
+                    color: preferences.distance_radius_km === value ? '#FFFFFF' : '#555555',
+                    fontSize: 12,
                     fontWeight: '600',
                   }}
                 >
-                  {tag}
+                  {label}
                 </Text>
               </Pressable>
-            );
-          })}
-        </View>
-      </View>
+            ))}
+          </View>
+        </SectionCard>
 
-      <View className="px-6 mb-8">
-        <View className="flex-row items-center justify-between bg-card border border-border rounded-xl p-4">
-          <Text className="text-text text-sm font-medium">Avoid chain restaurants</Text>
-          <Switch
-            value={preferences.avoid_chains}
-            onValueChange={(v) => updatePreferences({ avoid_chains: v })}
-            trackColor={{ false: '#2A2A2A', true: '#6C47FF' }}
-            thumbColor="#FFFFFF"
-          />
+        {/* ── Dietary ── */}
+        <View style={{ marginTop: 8, marginBottom: 12 }}>
+          <SectionLabel title="Dietary" />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {DIETARY_OPTIONS.map((tag) => {
+              const lower = tag.toLowerCase();
+              const active = preferences.dietary.includes(lower);
+              return (
+                <Pressable
+                  key={tag}
+                  onPress={() => toggleDietary(tag)}
+                  style={{
+                    backgroundColor: active ? 'rgba(108,71,255,0.15)' : '#111111',
+                    borderColor: active ? 'rgba(108,71,255,0.5)' : '#1E1E1E',
+                    borderWidth: 1,
+                    borderRadius: 99,
+                    paddingHorizontal: 14,
+                    paddingVertical: 7,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: active ? '#8B6FFF' : '#555555',
+                      fontSize: 13,
+                      fontWeight: '600',
+                    }}
+                  >
+                    {tag}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
-      </View>
 
-      <View className="px-6 mb-4">
+        {/* ── Toggles ── */}
+        <View style={{ marginTop: 4, marginBottom: 12 }}>
+          <SectionLabel title="Options" />
+          <SectionCard>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+              }}
+            >
+              <View style={{ flex: 1, marginRight: 16 }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>
+                  Avoid chain restaurants
+                </Text>
+                <Text style={{ color: '#444444', fontSize: 12, marginTop: 2 }}>
+                  Prefer independent options
+                </Text>
+              </View>
+              <Switch
+                value={preferences.avoid_chains}
+                onValueChange={(v) => updatePreferences({ avoid_chains: v })}
+                trackColor={{ false: '#1E1E1E', true: '#6C47FF' }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+          </SectionCard>
+        </View>
+
+        {/* ── Sign Out ── */}
         <Pressable
           onPress={handleSignOut}
-          className="bg-danger/10 border border-danger/30 rounded-xl py-4 items-center"
-          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#1A0A0F' : 'transparent',
+            borderWidth: 1,
+            borderColor: 'rgba(255,61,113,0.2)',
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
+            marginTop: 12,
+            marginBottom: 4,
+          })}
         >
-          <Text className="text-danger font-semibold text-sm">Sign Out</Text>
+          <Text style={{ color: '#FF3D71', fontWeight: '600', fontSize: 14 }}>Sign Out</Text>
         </Pressable>
-      </View>
 
-      <Text className="text-muted text-xs text-center">Sift v1.0.0</Text>
+        <Text style={{ color: '#2A2A2A', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+          Sift v1.0.0
+        </Text>
+      </View>
     </ScrollView>
   );
 }

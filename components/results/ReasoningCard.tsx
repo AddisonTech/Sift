@@ -15,26 +15,42 @@ interface ReasoningCardProps {
   breakdown?: ScoreBreakdown;
 }
 
-const DIMENSIONS: { key: keyof ScoreBreakdown; label: string }[] = [
-  { key: 'price', label: 'Price' },
-  { key: 'quality', label: 'Quality' },
-  { key: 'ethics', label: 'Ethics' },
-  { key: 'health', label: 'Health' },
-  { key: 'speed', label: 'Speed' },
+const DIMENSIONS: { key: keyof ScoreBreakdown; label: string; icon: string }[] = [
+  { key: 'price', label: 'Price', icon: '💰' },
+  { key: 'quality', label: 'Quality', icon: '⭐' },
+  { key: 'ethics', label: 'Ethics', icon: '🌱' },
+  { key: 'health', label: 'Health', icon: '💪' },
+  { key: 'speed', label: 'Speed', icon: '⚡' },
 ];
 
-function ScoreBar({ label, value }: { label: string; value: number }) {
+function ScoreBar({ label, icon, value }: { label: string; icon: string; value: number }) {
   const pct = Math.max(0, Math.min(100, value));
+  const color = pct >= 70 ? '#00E676' : pct >= 40 ? '#FFB300' : '#FF3D71';
+
   return (
-    <View className="mb-3">
-      <View className="flex-row justify-between mb-1">
-        <Text className="text-muted text-xs">{label}</Text>
-        <Text className="text-muted text-xs">{pct}</Text>
+    <View style={{ marginBottom: 12 }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Text style={{ fontSize: 12 }}>{icon}</Text>
+          <Text style={{ color: '#888888', fontSize: 12, fontWeight: '500' }}>{label}</Text>
+        </View>
+        <Text style={{ color, fontSize: 12, fontWeight: '700' }}>{pct}</Text>
       </View>
-      <View className="h-1 bg-border rounded-full overflow-hidden">
+      <View
+        style={{
+          height: 4,
+          backgroundColor: '#1A1A1A',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}
+      >
         <View
-          className="h-full rounded-full bg-primary"
-          style={{ width: `${pct}%` }}
+          style={{
+            height: '100%',
+            width: `${pct}%`,
+            backgroundColor: color,
+            borderRadius: 2,
+          }}
         />
       </View>
     </View>
@@ -43,15 +59,44 @@ function ScoreBar({ label, value }: { label: string; value: number }) {
 
 export default function ReasoningCard({ scan, breakdown }: ReasoningCardProps) {
   return (
-    <View className="bg-card rounded-2xl p-5 mx-4 mb-4">
-      <Text className="text-text text-sm leading-relaxed mb-5">{scan.reasoning}</Text>
+    <View
+      style={{
+        backgroundColor: '#111111',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#1A1A1A',
+        padding: 20,
+        marginHorizontal: 16,
+        marginBottom: 16,
+      }}
+    >
+      <Text
+        style={{
+          color: '#CCCCCC',
+          fontSize: 14,
+          lineHeight: 22,
+          fontWeight: '400',
+        }}
+      >
+        {scan.reasoning}
+      </Text>
+
       {breakdown && (
-        <View>
-          <Text className="text-muted text-xs font-semibold mb-3 uppercase tracking-wider">
+        <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#181818' }}>
+          <Text
+            style={{
+              color: '#333333',
+              fontSize: 10,
+              fontWeight: '700',
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+              marginBottom: 14,
+            }}
+          >
             Score Breakdown
           </Text>
-          {DIMENSIONS.map(({ key, label }) => (
-            <ScoreBar key={key} label={label} value={breakdown[key]} />
+          {DIMENSIONS.map(({ key, label, icon }) => (
+            <ScoreBar key={key} label={label} icon={icon} value={breakdown[key]} />
           ))}
         </View>
       )}

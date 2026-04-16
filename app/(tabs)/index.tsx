@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
@@ -36,12 +37,13 @@ export default function ScanScreen() {
 
   const flashOpacity = useSharedValue(0);
   const bracketScale = useSharedValue(1);
+  const pulseOpacity = useSharedValue(0);
 
   React.useEffect(() => {
     bracketScale.value = withRepeat(
       withSequence(
-        withTiming(1.04, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
-        withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1.05, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
+        withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
       ),
       -1,
       false,
@@ -75,12 +77,11 @@ export default function ScanScreen() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     flashOpacity.value = withSequence(
-      withTiming(0.7, { duration: 80 }),
-      withTiming(0, { duration: 200 }),
+      withTiming(0.6, { duration: 60 }),
+      withTiming(0, { duration: 240 }),
     );
 
     setIsAnalyzing(true);
-
     setScanError(null);
 
     try {
@@ -89,7 +90,9 @@ export default function ScanScreen() {
       let location: { lat: number; lng: number } | null = null;
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
         location = { lat: loc.coords.latitude, lng: loc.coords.longitude };
       }
 
@@ -171,131 +174,182 @@ export default function ScanScreen() {
   }, [isAnalyzing, preferences]);
 
   return (
-    <View className="flex-1 bg-background">
+    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+      {/* Camera */}
       <SiftCamera ref={cameraRef} />
 
+      {/* Flash overlay */}
       <Animated.View
         pointerEvents="none"
-        className="absolute inset-0 bg-white"
-        style={flashStyle}
+        style={[{ position: 'absolute', inset: 0, backgroundColor: '#FFFFFF' }, flashStyle]}
       />
 
+      {/* Top gradient for header readability */}
+      <LinearGradient
+        colors={['rgba(0,0,0,0.72)', 'rgba(0,0,0,0.32)', 'transparent']}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 180 }}
+        pointerEvents="none"
+      />
+
+      {/* Bottom gradient for controls readability */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.85)']}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220 }}
+        pointerEvents="none"
+      />
+
+      {/* Header */}
       <View
-        className="absolute top-0 left-0 right-0 flex-row items-center justify-between px-5"
-        style={{ paddingTop: insets.top + 12 }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 14,
+        }}
         pointerEvents="box-none"
       >
-        <Text
-          style={{ fontSize: 22, fontWeight: '800', color: '#6C47FF', letterSpacing: -0.5 }}
-        >
+        <Text style={{ fontSize: 22, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 }}>
           Sift
         </Text>
         {userAvatarUrl ? (
           <Image
             source={{ uri: userAvatarUrl }}
-            style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1.5, borderColor: '#2A2A2A' }}
+            style={{
+              width: 34, height: 34, borderRadius: 17,
+              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)',
+            }}
           />
         ) : (
           <View
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 17,
-              backgroundColor: '#1C1C1C',
-              borderWidth: 1.5,
-              borderColor: '#2A2A2A',
+              width: 34, height: 34, borderRadius: 17,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.15)',
             }}
           />
         )}
       </View>
 
-      <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
-        <Animated.View style={[bracketStyle]}>
-          <View style={{ width: 220, height: 220 }}>
-            <View
-              style={{
-                position: 'absolute', top: 0, left: 0,
-                width: 36, height: 36,
-                borderTopWidth: 2, borderLeftWidth: 2,
-                borderColor: '#6C47FF',
-                borderTopLeftRadius: 6,
-              }}
-            />
-            <View
-              style={{
-                position: 'absolute', top: 0, right: 0,
-                width: 36, height: 36,
-                borderTopWidth: 2, borderRightWidth: 2,
-                borderColor: '#6C47FF',
-                borderTopRightRadius: 6,
-              }}
-            />
-            <View
-              style={{
-                position: 'absolute', bottom: 0, left: 0,
-                width: 36, height: 36,
-                borderBottomWidth: 2, borderLeftWidth: 2,
-                borderColor: '#6C47FF',
-                borderBottomLeftRadius: 6,
-              }}
-            />
-            <View
-              style={{
-                position: 'absolute', bottom: 0, right: 0,
-                width: 36, height: 36,
-                borderBottomWidth: 2, borderRightWidth: 2,
-                borderColor: '#6C47FF',
-                borderBottomRightRadius: 6,
-              }}
-            />
+      {/* Center: bracket overlay + status */}
+      <View
+        style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}
+        pointerEvents="none"
+      >
+        <Animated.View style={bracketStyle}>
+          <View style={{ width: 240, height: 240 }}>
+            {/* Corner brackets with glow */}
+            {[
+              { top: 0, left: 0, borderTopWidth: 2.5, borderLeftWidth: 2.5, borderTopLeftRadius: 8 },
+              { top: 0, right: 0, borderTopWidth: 2.5, borderRightWidth: 2.5, borderTopRightRadius: 8 },
+              { bottom: 0, left: 0, borderBottomWidth: 2.5, borderLeftWidth: 2.5, borderBottomLeftRadius: 8 },
+              { bottom: 0, right: 0, borderBottomWidth: 2.5, borderRightWidth: 2.5, borderBottomRightRadius: 8 },
+            ].map((s, i) => (
+              <View
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: 40, height: 40,
+                  borderColor: '#6C47FF',
+                  shadowColor: '#6C47FF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.9,
+                  shadowRadius: 6,
+                  elevation: 6,
+                  ...s,
+                }}
+              />
+            ))}
           </View>
         </Animated.View>
 
         {!isAnalyzing && (
-          <Text className="text-white/50 text-sm mt-6" style={{ letterSpacing: 0.3 }}>
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: 12,
+              marginTop: 20,
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+            }}
+          >
             Point at anything
           </Text>
         )}
       </View>
 
+      {/* Error banner */}
       {scanError && (
         <View
-          className="absolute left-4 right-4 bg-danger/10 border border-danger/30 rounded-xl px-4 py-3"
-          style={{ bottom: 140 }}
+          style={{
+            position: 'absolute',
+            left: 16,
+            right: 16,
+            bottom: 148,
+            backgroundColor: 'rgba(255,61,113,0.12)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,61,113,0.25)',
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+          }}
         >
-          <Text className="text-danger text-sm text-center">{scanError}</Text>
+          <Text style={{ color: '#FF3D71', fontSize: 13, textAlign: 'center' }}>{scanError}</Text>
         </View>
       )}
 
+      {/* Bottom controls */}
       <View
-        className="absolute bottom-0 left-0 right-0 items-center"
-        style={{ paddingBottom: 40 }}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          paddingBottom: insets.bottom + 28,
+        }}
       >
         {isAnalyzing ? (
-          <View className="items-center">
+          <View style={{ alignItems: 'center', gap: 12 }}>
             <ActivityIndicator size="large" color="#6C47FF" />
-            <Text className="text-muted text-sm mt-3">Analyzing…</Text>
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 0.5 }}>
+              Analyzing…
+            </Text>
           </View>
         ) : (
           <Pressable
             onPress={handleCapture}
             style={({ pressed }) => ({
-              width: 76,
-              height: 76,
-              borderRadius: 38,
+              width: 80,
+              height: 80,
+              borderRadius: 40,
               borderWidth: 3,
-              borderColor: '#FFFFFF',
-              backgroundColor: pressed ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+              borderColor: 'rgba(255,255,255,0.85)',
+              backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
               alignItems: 'center',
               justifyContent: 'center',
+              shadowColor: '#FFFFFF',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: pressed ? 0.3 : 0.12,
+              shadowRadius: 16,
+              elevation: 8,
+              transform: [{ scale: pressed ? 0.95 : 1 }],
             })}
           >
             <View
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
+                width: 58,
+                height: 58,
+                borderRadius: 29,
                 backgroundColor: '#FFFFFF',
+                shadowColor: '#FFFFFF',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.4,
+                shadowRadius: 8,
               }}
             />
           </Pressable>
