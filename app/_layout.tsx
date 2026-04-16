@@ -1,5 +1,6 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -60,6 +61,16 @@ export default function RootLayout() {
       router.replace('/(tabs)');
     }
   }, [session, onboardingDone, segments, navigatorReady]);
+
+  if (session === undefined || onboardingDone === null) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <View style={{ flex: 1, backgroundColor: '#0A0A0A' }} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
