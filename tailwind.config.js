@@ -5,17 +5,19 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#0A0A0A',
-        surface: '#141414',
-        card: '#1C1C1C',
-        border: '#2A2A2A',
-        primary: '#6C47FF',
-        accent: '#00D1FF',
-        success: '#00E676',
-        warning: '#FFB300',
-        danger: '#FF3D71',
-        text: '#FFFFFF',
-        muted: '#9E9E9E',
+        // Defined as RGB so NativeWind can construct opacity variants
+        // (e.g. bg-primary/10, text-danger/50) correctly on both web and native.
+        background: 'rgb(10 10 10)',
+        surface:    'rgb(20 20 20)',
+        card:       'rgb(28 28 28)',
+        border:     'rgb(42 42 42)',
+        primary:    'rgb(108 71 255)',
+        accent:     'rgb(0 209 255)',
+        success:    'rgb(0 230 118)',
+        warning:    'rgb(255 179 0)',
+        danger:     'rgb(255 61 113)',
+        text:       'rgb(255 255 255)',
+        muted:      'rgb(158 158 158)',
       },
     },
   },

@@ -15,15 +15,13 @@ export default function RootLayout() {
   const segments = useSegments();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-  // navigatorReady defers redirects until after the first render cycle,
-  // ensuring expo-router's navigator is mounted before any replace() call.
   const [navigatorReady, setNavigatorReady] = useState(false);
 
   useEffect(() => {
-    // Mark navigator as ready after the first render
     setNavigatorReady(true);
   }, []);
 
+  // Subscribe to auth state changes
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -33,15 +31,21 @@ export default function RootLayout() {
       setSession(newSession);
     });
 
-    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
-      setOnboardingDone(val === 'true');
-    });
-
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  // Re-read onboarding flag whenever session resolves or changes.
+  // This ensures the guest flow (which sets the flag just before signInAnonymously)
+  // is visible by the time the auth state change fires here.
   useEffect(() => {
-    // Wait until all async state is resolved and the navigator is mounted
+    if (session === undefined) return;
+    AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
+      setOnboardingDone(val === 'true');
+    });
+  }, [session]);
+
+  // Routing guard
+  useEffect(() => {
     if (session === undefined || onboardingDone === null || !navigatorReady) return;
 
     const inAuth = segments[0] === '(auth)';
