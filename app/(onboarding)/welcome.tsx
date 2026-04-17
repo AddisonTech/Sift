@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { colors } from '../../lib/theme';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
@@ -21,7 +22,7 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Background glow */}
       <LinearGradient
         colors={['#6C47FF20', '#6C47FF08', '#0A0A0A00']}
@@ -41,7 +42,7 @@ export default function WelcomeScreen() {
         style={{ position: 'absolute', top: insets.top + 16, right: 20 }}
         hitSlop={16}
       >
-        <Text style={{ color: '#333333', fontSize: 14, fontWeight: '500' }}>Skip</Text>
+        <Text style={{ color: colors.subtle, fontSize: 14, fontWeight: '500' }}>Skip</Text>
       </Pressable>
 
       {/* Content */}
@@ -59,9 +60,9 @@ export default function WelcomeScreen() {
             width: 10,
             height: 10,
             borderRadius: 5,
-            backgroundColor: '#6C47FF',
+            backgroundColor: colors.primary,
             marginBottom: 20,
-            shadowColor: '#6C47FF',
+            shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 1,
             shadowRadius: 14,
@@ -71,7 +72,7 @@ export default function WelcomeScreen() {
 
         <Text
           style={{
-            color: '#FFFFFF',
+            color: colors.text,
             fontSize: 42,
             fontWeight: '900',
             lineHeight: 48,
@@ -83,7 +84,7 @@ export default function WelcomeScreen() {
         </Text>
         <Text
           style={{
-            color: '#444444',
+            color: colors.muted,
             fontSize: 15,
             lineHeight: 24,
             marginBottom: 36,
@@ -97,25 +98,25 @@ export default function WelcomeScreen() {
         <Pressable
           onPress={handleGetStarted}
           style={({ pressed }) => ({
-            backgroundColor: pressed ? '#5A38E8' : '#6C47FF',
+            backgroundColor: pressed ? '#5A38E8' : colors.primary,
             borderRadius: 14,
             paddingVertical: 16,
             alignItems: 'center',
             marginBottom: 12,
-            shadowColor: '#6C47FF',
+            shadowColor: colors.primary,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: pressed ? 0.2 : 0.35,
             shadowRadius: 16,
             elevation: 8,
           })}
         >
-          <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
+          <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
             Personalize Sift
           </Text>
         </Pressable>
 
         <Pressable onPress={handleSkip} style={{ alignItems: 'center', paddingVertical: 12 }}>
-          <Text style={{ color: '#333333', fontSize: 14 }}>Use default settings</Text>
+          <Text style={{ color: colors.subtle, fontSize: 14 }}>Use default settings</Text>
         </Pressable>
       </View>
     </View>

@@ -13,26 +13,27 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
+import { colors } from '../../lib/theme';
 
 const BASE_INPUT: object = {
-  backgroundColor: '#111111',
+  backgroundColor: colors.card,
   borderWidth: 1,
-  borderColor: '#252525',
+  borderColor: colors.border,
   borderRadius: 10,
   paddingHorizontal: 16,
   paddingVertical: 15,
-  color: '#FFFFFF',
+  color: colors.text,
   fontSize: 15,
   letterSpacing: 0.1,
 };
 
 const FOCUSED_INPUT: object = {
-  borderColor: '#6C47FF',
-  backgroundColor: '#0D0D0D',
+  borderColor: colors.primary,
+  backgroundColor: colors.background,
 };
 
 const LABEL: object = {
-  color: '#555555',
+  color: colors.subtle,
   fontSize: 11,
   fontWeight: '600' as const,
   letterSpacing: 1,
@@ -78,7 +79,7 @@ export default function SignupScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0A0A0A' }}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Ambient top glow */}
@@ -102,13 +103,13 @@ export default function SignupScreen() {
             paddingBottom: insets.bottom + 32,
           }}
         >
-          {/* ── Back + Wordmark ── */}
+          {/* ── Back ── */}
           <Pressable
             onPress={() => router.back()}
             style={{ marginBottom: 36, alignSelf: 'flex-start' }}
             hitSlop={12}
           >
-            <Text style={{ color: '#555555', fontSize: 13, fontWeight: '500' }}>← Back</Text>
+            <Text style={{ color: colors.subtle, fontSize: 13, fontWeight: '500' }}>← Back</Text>
           </Pressable>
 
           <View style={{ marginBottom: 40 }}>
@@ -116,7 +117,7 @@ export default function SignupScreen() {
               style={{
                 fontSize: 34,
                 fontWeight: '800',
-                color: '#FFFFFF',
+                color: colors.text,
                 letterSpacing: -1.5,
                 lineHeight: 38,
                 marginBottom: 6,
@@ -124,7 +125,7 @@ export default function SignupScreen() {
             >
               Create account
             </Text>
-            <Text style={{ color: '#444444', fontSize: 14, letterSpacing: 0.1 }}>
+            <Text style={{ color: colors.subtle, fontSize: 14, letterSpacing: 0.1 }}>
               Start making better decisions today.
             </Text>
           </View>
@@ -142,7 +143,7 @@ export default function SignupScreen() {
                 marginBottom: 20,
               }}
             >
-              <Text style={{ color: '#FF3D71', fontSize: 13, textAlign: 'center' }}>
+              <Text style={{ color: colors.danger, fontSize: 13, textAlign: 'center' }}>
                 {error}
               </Text>
             </View>
@@ -158,7 +159,7 @@ export default function SignupScreen() {
               onBlur={() => setFocused(null)}
               autoCapitalize="words"
               autoComplete="name"
-              placeholderTextColor="#303030"
+              placeholderTextColor={colors.placeholder}
               placeholder="Your name"
               style={[BASE_INPUT, focused === 'name' && FOCUSED_INPUT]}
             />
@@ -175,7 +176,7 @@ export default function SignupScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
-              placeholderTextColor="#303030"
+              placeholderTextColor={colors.placeholder}
               placeholder="you@example.com"
               style={[BASE_INPUT, focused === 'email' && FOCUSED_INPUT]}
             />
@@ -191,7 +192,7 @@ export default function SignupScreen() {
               onBlur={() => setFocused(null)}
               secureTextEntry
               autoComplete="new-password"
-              placeholderTextColor="#303030"
+              placeholderTextColor={colors.placeholder}
               placeholder="Minimum 6 characters"
               style={[BASE_INPUT, focused === 'password' && FOCUSED_INPUT]}
             />
@@ -202,7 +203,7 @@ export default function SignupScreen() {
             onPress={handleSignUp}
             disabled={loading}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? '#5A38E8' : '#6C47FF',
+              backgroundColor: pressed ? '#5A38E8' : colors.primary,
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center',
@@ -213,18 +214,18 @@ export default function SignupScreen() {
             })}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.text} size="small" />
             ) : (
-              <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
+              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
                 Create Account
               </Text>
             )}
           </Pressable>
 
           <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: '#3A3A3A', fontSize: 13 }}>Already have an account?{'  '}</Text>
+            <Text style={{ color: colors.subtle, fontSize: 13 }}>Already have an account?{'  '}</Text>
             <Pressable onPress={() => router.replace('/(auth)/login')} disabled={loading}>
-              <Text style={{ color: '#6C47FF', fontSize: 13, fontWeight: '600' }}>Sign In</Text>
+              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>Sign In</Text>
             </Pressable>
           </View>
         </View>

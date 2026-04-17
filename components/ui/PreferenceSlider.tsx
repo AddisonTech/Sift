@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Pressable } from 'react-native';
+import { colors } from '../../lib/theme';
 
 interface PreferenceSliderProps {
   value: number;
@@ -30,9 +31,9 @@ export default function PreferenceSlider({
               flex: 1,
               height: active ? 8 : 6,
               borderRadius: 4,
-              backgroundColor: active ? '#6C47FF' : '#1E1E1E',
+              backgroundColor: active ? colors.primary : '#242424',
               ...(selected && {
-                shadowColor: '#6C47FF',
+                shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 0 },
                 shadowOpacity: 0.6,
                 shadowRadius: 4,

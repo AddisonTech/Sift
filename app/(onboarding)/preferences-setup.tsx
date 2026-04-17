@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { defaultPreferences } from '../../lib/utils';
 import type { UserPreferences } from '../../lib/types';
+import { colors } from '../../lib/theme';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
@@ -96,7 +97,7 @@ export default function PreferencesSetupScreen() {
       contentContainerStyle={{ paddingBottom: 48 }}
     >
       <View className="px-6 pt-16 pb-6">
-        <Text style={{ fontSize: 32, fontWeight: '800', color: '#FFFFFF', letterSpacing: -1 }}>
+        <Text style={{ fontSize: 32, fontWeight: '800', color: colors.text, letterSpacing: -1 }}>
           What matters{'\n'}to you?
         </Text>
         <Text className="text-muted text-sm mt-2">
@@ -135,8 +136,8 @@ export default function PreferencesSetupScreen() {
               onPress={() => setPrefs((p) => ({ ...p, budget: value }))}
               style={{
                 flex: 1,
-                backgroundColor: prefs.budget === value ? '#6C47FF' : '#1C1C1C',
-                borderColor: prefs.budget === value ? '#6C47FF' : '#2A2A2A',
+                backgroundColor: prefs.budget === value ? colors.primary : colors.card,
+                borderColor: prefs.budget === value ? colors.primary : colors.border,
                 borderWidth: 1,
                 borderRadius: 12,
                 paddingVertical: 10,
@@ -145,7 +146,7 @@ export default function PreferencesSetupScreen() {
             >
               <Text
                 style={{
-                  color: prefs.budget === value ? '#FFFFFF' : '#9E9E9E',
+                  color: prefs.budget === value ? colors.text : colors.muted,
                   fontSize: 13,
                   fontWeight: '600',
                 }}
@@ -168,8 +169,8 @@ export default function PreferencesSetupScreen() {
               onPress={() => setPrefs((p) => ({ ...p, distance_radius_km: value }))}
               style={{
                 flex: 1,
-                backgroundColor: prefs.distance_radius_km === value ? '#6C47FF' : '#1C1C1C',
-                borderColor: prefs.distance_radius_km === value ? '#6C47FF' : '#2A2A2A',
+                backgroundColor: prefs.distance_radius_km === value ? colors.primary : colors.card,
+                borderColor: prefs.distance_radius_km === value ? colors.primary : colors.border,
                 borderWidth: 1,
                 borderRadius: 12,
                 paddingVertical: 10,
@@ -178,7 +179,7 @@ export default function PreferencesSetupScreen() {
             >
               <Text
                 style={{
-                  color: prefs.distance_radius_km === value ? '#FFFFFF' : '#9E9E9E',
+                  color: prefs.distance_radius_km === value ? colors.text : colors.muted,
                   fontSize: 13,
                   fontWeight: '600',
                 }}
@@ -203,8 +204,8 @@ export default function PreferencesSetupScreen() {
                 key={tag}
                 onPress={() => toggleDietary(tag)}
                 style={{
-                  backgroundColor: active ? '#6C47FF22' : '#1C1C1C',
-                  borderColor: active ? '#6C47FF88' : '#2A2A2A',
+                  backgroundColor: active ? 'rgba(108,71,255,0.13)' : colors.card,
+                  borderColor: active ? 'rgba(108,71,255,0.53)' : colors.border,
                   borderWidth: 1,
                   borderRadius: 999,
                   paddingHorizontal: 14,
@@ -213,7 +214,7 @@ export default function PreferencesSetupScreen() {
               >
                 <Text
                   style={{
-                    color: active ? '#6C47FF' : '#9E9E9E',
+                    color: active ? colors.primary : colors.muted,
                     fontSize: 13,
                     fontWeight: '600',
                   }}
@@ -232,8 +233,8 @@ export default function PreferencesSetupScreen() {
           <Switch
             value={prefs.avoid_chains}
             onValueChange={(v) => setPrefs((p) => ({ ...p, avoid_chains: v }))}
-            trackColor={{ false: '#2A2A2A', true: '#6C47FF' }}
-            thumbColor="#FFFFFF"
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={colors.text}
           />
         </View>
       </View>

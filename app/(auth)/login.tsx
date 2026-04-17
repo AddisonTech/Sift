@@ -14,28 +14,29 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
+import { colors } from '../../lib/theme';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
 const BASE_INPUT: object = {
-  backgroundColor: '#111111',
+  backgroundColor: colors.card,
   borderWidth: 1,
-  borderColor: '#252525',
+  borderColor: colors.border,
   borderRadius: 10,
   paddingHorizontal: 16,
   paddingVertical: 15,
-  color: '#FFFFFF',
+  color: colors.text,
   fontSize: 15,
   letterSpacing: 0.1,
 };
 
 const FOCUSED_INPUT: object = {
-  borderColor: '#6C47FF',
-  backgroundColor: '#0D0D0D',
+  borderColor: colors.primary,
+  backgroundColor: colors.background,
 };
 
 const LABEL: object = {
-  color: '#555555',
+  color: colors.subtle,
   fontSize: 11,
   fontWeight: '600' as const,
   letterSpacing: 1,
@@ -86,7 +87,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: '#0A0A0A' }}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Ambient top glow */}
@@ -117,9 +118,9 @@ export default function LoginScreen() {
                 width: 10,
                 height: 10,
                 borderRadius: 5,
-                backgroundColor: '#6C47FF',
+                backgroundColor: colors.primary,
                 marginBottom: 18,
-                shadowColor: '#6C47FF',
+                shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 0 },
                 shadowOpacity: 1,
                 shadowRadius: 12,
@@ -130,7 +131,7 @@ export default function LoginScreen() {
               style={{
                 fontSize: 68,
                 fontWeight: '900',
-                color: '#FFFFFF',
+                color: colors.text,
                 letterSpacing: -4,
                 lineHeight: 68,
                 textAlign: 'center',
@@ -140,7 +141,7 @@ export default function LoginScreen() {
             </Text>
             <Text
               style={{
-                color: '#404040',
+                color: colors.subtle,
                 fontSize: 12,
                 letterSpacing: 2.5,
                 textTransform: 'uppercase',
@@ -165,7 +166,7 @@ export default function LoginScreen() {
                 marginBottom: 20,
               }}
             >
-              <Text style={{ color: '#FF3D71', fontSize: 13, textAlign: 'center' }}>
+              <Text style={{ color: colors.danger, fontSize: 13, textAlign: 'center' }}>
                 {error}
               </Text>
             </View>
@@ -182,7 +183,7 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
-              placeholderTextColor="#303030"
+              placeholderTextColor={colors.placeholder}
               placeholder="you@example.com"
               style={[BASE_INPUT, focused === 'email' && FOCUSED_INPUT]}
             />
@@ -198,7 +199,7 @@ export default function LoginScreen() {
               onBlur={() => setFocused(null)}
               secureTextEntry
               autoComplete="password"
-              placeholderTextColor="#303030"
+              placeholderTextColor={colors.placeholder}
               placeholder="••••••••"
               style={[BASE_INPUT, focused === 'password' && FOCUSED_INPUT]}
             />
@@ -209,7 +210,7 @@ export default function LoginScreen() {
             onPress={handleSignIn}
             disabled={anyLoading}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? '#5A38E8' : '#6C47FF',
+              backgroundColor: pressed ? '#5A38E8' : colors.primary,
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center',
@@ -219,9 +220,9 @@ export default function LoginScreen() {
             })}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colors.text} size="small" />
             ) : (
-              <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
+              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15, letterSpacing: 0.2 }}>
                 Sign In
               </Text>
             )}
@@ -229,9 +230,9 @@ export default function LoginScreen() {
 
           {/* ── Divider ── */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 20 }}>
-            <View style={{ flex: 1, height: 1, backgroundColor: '#1A1A1A' }} />
-            <Text style={{ color: '#303030', fontSize: 12, marginHorizontal: 14 }}>or</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: '#1A1A1A' }} />
+            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            <Text style={{ color: colors.placeholder, fontSize: 12, marginHorizontal: 14 }}>or</Text>
+            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
           </View>
 
           {/* ── Continue as Guest ── */}
@@ -239,9 +240,9 @@ export default function LoginScreen() {
             onPress={handleGuest}
             disabled={anyLoading}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? '#141414' : 'transparent',
+              backgroundColor: pressed ? colors.surface : 'transparent',
               borderWidth: 1,
-              borderColor: '#222222',
+              borderColor: colors.border,
               borderRadius: 12,
               paddingVertical: 15,
               alignItems: 'center',
@@ -251,9 +252,9 @@ export default function LoginScreen() {
             })}
           >
             {guestLoading ? (
-              <ActivityIndicator color="#555555" size="small" />
+              <ActivityIndicator color={colors.subtle} size="small" />
             ) : (
-              <Text style={{ color: '#888888', fontWeight: '600', fontSize: 14, letterSpacing: 0.2 }}>
+              <Text style={{ color: colors.muted, fontWeight: '600', fontSize: 14, letterSpacing: 0.2 }}>
                 Continue as Guest
               </Text>
             )}
@@ -268,9 +269,9 @@ export default function LoginScreen() {
               marginTop: 28,
             }}
           >
-            <Text style={{ color: '#3A3A3A', fontSize: 13 }}>New to Sift?{'  '}</Text>
+            <Text style={{ color: colors.subtle, fontSize: 13 }}>New to Sift?{'  '}</Text>
             <Pressable onPress={() => router.push('/(auth)/signup')} disabled={anyLoading}>
-              <Text style={{ color: '#6C47FF', fontSize: 13, fontWeight: '600' }}>
+              <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>
                 Create account
               </Text>
             </Pressable>
