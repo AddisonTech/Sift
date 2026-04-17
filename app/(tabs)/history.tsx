@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useSiftStore } from '../../store';
 import { verdictColor } from '../../lib/utils';
+import { colors } from '../../lib/theme';
 import type { ScanResult, ItemCategory, VerdictType } from '../../lib/types';
 
 const CATEGORY_ICONS: Record<ItemCategory, string> = {
@@ -83,7 +84,7 @@ function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) 
           <Text style={{ color, fontWeight: '800', fontSize: 20, letterSpacing: -0.5 }}>
             {scan.score}
           </Text>
-          <Text style={{ color: '#444444', fontSize: 11, marginTop: 2 }}>{dateStr}</Text>
+          <Text style={{ color: colors.subtle, fontSize: 11, marginTop: 2 }}>{dateStr}</Text>
         </View>
       </View>
     </Pressable>
@@ -141,8 +142,8 @@ export default function HistoryScreen() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#6C47FF" />
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -161,7 +162,7 @@ export default function HistoryScreen() {
           History
         </Text>
         {scans.length > 0 && (
-          <Text style={{ color: '#444444', fontSize: 13, marginTop: 3 }}>
+          <Text style={{ color: colors.subtle, fontSize: 13, marginTop: 3 }}>
             {scans.length} scan{scans.length !== 1 ? 's' : ''}
           </Text>
         )}
@@ -180,7 +181,7 @@ export default function HistoryScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#6C47FF"
+            tintColor={colors.primary}
           />
         }
         ListEmptyComponent={

@@ -22,6 +22,7 @@ import Animated, {
 import { supabase } from '../../lib/supabase';
 import { useSiftStore } from '../../store';
 import { usePreferences } from '../../hooks/usePreferences';
+import { colors } from '../../lib/theme';
 import SiftCamera, { type SiftCameraRef } from '../../components/camera/SiftCamera';
 import type { ScanResult, ItemCategory, VerdictType } from '../../lib/types';
 
@@ -254,8 +255,8 @@ export default function ScanScreen() {
                 style={{
                   position: 'absolute',
                   width: 40, height: 40,
-                  borderColor: '#6C47FF',
-                  shadowColor: '#6C47FF',
+                  borderColor: colors.primary,
+                  shadowColor: colors.primary,
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0.9,
                   shadowRadius: 6,
@@ -315,7 +316,7 @@ export default function ScanScreen() {
       >
         {isAnalyzing ? (
           <View style={{ alignItems: 'center', gap: 12 }}>
-            <ActivityIndicator size="large" color="#6C47FF" />
+            <ActivityIndicator size="large" color={colors.primary} />
             <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 0.5 }}>
               Analyzing…
             </Text>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, Pressable, Linking } from 'react-native';
 import type { OnlineAlternative } from '../../lib/types';
 import { formatPrice } from '../../lib/utils';
+import { colors } from '../../lib/theme';
 
 interface OnlineAlternativeCardProps {
   alternative: OnlineAlternative;
@@ -17,9 +18,9 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
   return (
     <View
       style={{
-        backgroundColor: '#111111',
+        backgroundColor: colors.card,
         borderWidth: 1,
-        borderColor: '#1E1E1E',
+        borderColor: colors.border,
         borderRadius: 16,
         padding: 14,
         marginBottom: 10,
@@ -36,7 +37,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
             height: 56,
             borderRadius: 10,
             marginRight: 14,
-            backgroundColor: '#1A1A1A',
+            backgroundColor: '#242424',
           }}
           resizeMode="cover"
         />
@@ -47,7 +48,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
             height: 56,
             borderRadius: 10,
             marginRight: 14,
-            backgroundColor: '#1A1A1A',
+            backgroundColor: '#242424',
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -58,13 +59,13 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
 
       <View style={{ flex: 1, marginRight: 12 }}>
         <Text
-          style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 13, lineHeight: 18, marginBottom: 2 }}
+          style={{ color: colors.text, fontWeight: '600', fontSize: 13, lineHeight: 18, marginBottom: 2 }}
           numberOfLines={2}
         >
           {alternative.name}
         </Text>
-        <Text style={{ color: '#444444', fontSize: 11, marginBottom: 4 }}>{alternative.merchant}</Text>
-        <Text style={{ color: '#00E676', fontWeight: '700', fontSize: 14 }}>
+        <Text style={{ color: '#565656', fontSize: 11, marginBottom: 4 }}>{alternative.merchant}</Text>
+        <Text style={{ color: colors.success, fontWeight: '700', fontSize: 14 }}>
           {formatPrice(alternative.price, alternative.currency)}
         </Text>
       </View>
@@ -78,7 +79,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
           paddingVertical: 8,
         })}
       >
-        <Text style={{ color: '#6C47FF', fontSize: 12, fontWeight: '700' }}>View</Text>
+        <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>View</Text>
       </Pressable>
     </View>
   );

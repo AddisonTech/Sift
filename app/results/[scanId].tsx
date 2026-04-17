@@ -19,6 +19,7 @@ import Animated, {
 import { supabase } from '../../lib/supabase';
 import { useSiftStore } from '../../store';
 import { verdictColor } from '../../lib/utils';
+import { colors } from '../../lib/theme';
 import ScoreRing from '../../components/results/ScoreRing';
 import VerdictBadge from '../../components/results/VerdictBadge';
 import ReasoningCard from '../../components/results/ReasoningCard';
@@ -122,20 +123,20 @@ export default function ResultsScreen() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#6C47FF" />
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (!scan) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-        <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '700', marginBottom: 8 }}>
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', marginBottom: 8 }}>
           Scan not found
         </Text>
         <Pressable onPress={() => router.back()}>
-          <Text style={{ color: '#6C47FF', fontSize: 14 }}>Go back</Text>
+          <Text style={{ color: colors.primary, fontSize: 14 }}>Go back</Text>
         </Pressable>
       </View>
     );
@@ -178,7 +179,7 @@ export default function ResultsScreen() {
               }}
             >
               <AnimatedScore score={scan.score} color={color} />
-              <Text style={{ color: '#333333', fontSize: 12, fontWeight: '600', marginTop: -2 }}>
+              <Text style={{ color: colors.subtle, fontSize: 12, fontWeight: '600', marginTop: -2 }}>
                 / 100
               </Text>
             </View>
@@ -209,7 +210,7 @@ export default function ResultsScreen() {
           <View style={{ marginBottom: 16 }}>
             <Text
               style={{
-                color: '#333333',
+                color: colors.subtle,
                 fontSize: 10,
                 fontWeight: '700',
                 letterSpacing: 1.5,
@@ -237,7 +238,7 @@ export default function ResultsScreen() {
           <View style={{ marginBottom: 16 }}>
             <Text
               style={{
-                color: '#333333',
+                color: colors.subtle,
                 fontSize: 10,
                 fontWeight: '700',
                 letterSpacing: 1.5,

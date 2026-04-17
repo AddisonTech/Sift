@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { usePreferences } from '../../hooks/usePreferences';
 import type { UserPreferences } from '../../lib/types';
+import { colors } from '../../lib/theme';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
@@ -48,10 +49,10 @@ function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <View
       style={{
-        backgroundColor: '#111111',
+        backgroundColor: colors.card,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#1E1E1E',
+        borderColor: colors.border,
         overflow: 'hidden',
         marginBottom: 12,
       }}
@@ -65,7 +66,7 @@ function SectionLabel({ title }: { title: string }) {
   return (
     <Text
       style={{
-        color: '#444444',
+        color: colors.subtle,
         fontSize: 11,
         fontWeight: '600',
         letterSpacing: 1.2,
@@ -163,7 +164,7 @@ export default function ProfileScreen() {
           {displayName || 'Guest'}
         </Text>
         {email ? (
-          <Text style={{ color: '#444444', fontSize: 13, marginTop: 3 }}>{email}</Text>
+          <Text style={{ color: colors.subtle, fontSize: 13, marginTop: 3 }}>{email}</Text>
         ) : null}
       </View>
 
@@ -179,16 +180,16 @@ export default function ProfileScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 14,
                 borderBottomWidth: index < WEIGHT_FIELDS.length - 1 ? 1 : 0,
-                borderBottomColor: '#181818',
+                borderBottomColor: '#242424',
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                 <Text style={{ fontSize: 14, marginRight: 8 }}>{icon}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>{label}</Text>
-                  <Text style={{ color: '#444444', fontSize: 11, marginTop: 1 }}>{description}</Text>
+                  <Text style={{ color: colors.subtle, fontSize: 11, marginTop: 1 }}>{description}</Text>
                 </View>
-                <Text style={{ color: '#6C47FF', fontWeight: '700', fontSize: 14 }}>
+                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 14 }}>
                   {preferences[key]}
                 </Text>
               </View>
@@ -213,7 +214,7 @@ export default function ProfileScreen() {
                   onPress={() => updatePreferences({ budget: value })}
                   style={{
                     flex: 1,
-                    backgroundColor: preferences.budget === value ? '#6C47FF' : 'transparent',
+                    backgroundColor: preferences.budget === value ? colors.primary : 'transparent',
                     borderRadius: 10,
                     paddingVertical: 10,
                     alignItems: 'center',
@@ -222,7 +223,7 @@ export default function ProfileScreen() {
                 >
                   <Text
                     style={{
-                      color: preferences.budget === value ? '#FFFFFF' : '#555555',
+                      color: preferences.budget === value ? colors.text : colors.subtle,
                       fontSize: 13,
                       fontWeight: '600',
                     }}
@@ -245,7 +246,7 @@ export default function ProfileScreen() {
                 onPress={() => updatePreferences({ distance_radius_km: value })}
                 style={{
                   flex: 1,
-                  backgroundColor: preferences.distance_radius_km === value ? '#6C47FF' : 'transparent',
+                  backgroundColor: preferences.distance_radius_km === value ? colors.primary : 'transparent',
                   borderRadius: 10,
                   paddingVertical: 10,
                   alignItems: 'center',
@@ -254,7 +255,7 @@ export default function ProfileScreen() {
               >
                 <Text
                   style={{
-                    color: preferences.distance_radius_km === value ? '#FFFFFF' : '#555555',
+                    color: preferences.distance_radius_km === value ? colors.text : colors.subtle,
                     fontSize: 12,
                     fontWeight: '600',
                   }}
@@ -318,14 +319,14 @@ export default function ProfileScreen() {
                 <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>
                   Avoid chain restaurants
                 </Text>
-                <Text style={{ color: '#444444', fontSize: 12, marginTop: 2 }}>
+                <Text style={{ color: colors.subtle, fontSize: 12, marginTop: 2 }}>
                   Prefer independent options
                 </Text>
               </View>
               <Switch
                 value={preferences.avoid_chains}
                 onValueChange={(v) => updatePreferences({ avoid_chains: v })}
-                trackColor={{ false: '#1E1E1E', true: '#6C47FF' }}
+                trackColor={{ false: colors.border, true: colors.primary }}
                 thumbColor="#FFFFFF"
               />
             </View>
@@ -349,7 +350,7 @@ export default function ProfileScreen() {
           <Text style={{ color: '#FF3D71', fontWeight: '600', fontSize: 14 }}>Sign Out</Text>
         </Pressable>
 
-        <Text style={{ color: '#2A2A2A', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+        <Text style={{ color: '#383838', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
           Sift v1.0.0
         </Text>
       </View>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import type { ScanResult } from '../../lib/types';
+import { colors } from '../../lib/theme';
 
 interface ScoreBreakdown {
   price: number;
@@ -25,21 +26,21 @@ const DIMENSIONS: { key: keyof ScoreBreakdown; label: string; icon: string }[] =
 
 function ScoreBar({ label, icon, value }: { label: string; icon: string; value: number }) {
   const pct = Math.max(0, Math.min(100, value));
-  const color = pct >= 70 ? '#00E676' : pct >= 40 ? '#FFB300' : '#FF3D71';
+  const color = pct >= 70 ? colors.success : pct >= 40 ? colors.warning : colors.danger;
 
   return (
     <View style={{ marginBottom: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Text style={{ fontSize: 12 }}>{icon}</Text>
-          <Text style={{ color: '#888888', fontSize: 12, fontWeight: '500' }}>{label}</Text>
+          <Text style={{ color: colors.muted, fontSize: 12, fontWeight: '500' }}>{label}</Text>
         </View>
         <Text style={{ color, fontSize: 12, fontWeight: '700' }}>{pct}</Text>
       </View>
       <View
         style={{
           height: 4,
-          backgroundColor: '#1A1A1A',
+          backgroundColor: colors.border,
           borderRadius: 2,
           overflow: 'hidden',
         }}
@@ -61,10 +62,10 @@ export default function ReasoningCard({ scan, breakdown }: ReasoningCardProps) {
   return (
     <View
       style={{
-        backgroundColor: '#111111',
+        backgroundColor: colors.card,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#1A1A1A',
+        borderColor: colors.border,
         padding: 20,
         marginHorizontal: 16,
         marginBottom: 16,
@@ -72,7 +73,7 @@ export default function ReasoningCard({ scan, breakdown }: ReasoningCardProps) {
     >
       <Text
         style={{
-          color: '#CCCCCC',
+          color: '#E0E0E0',
           fontSize: 14,
           lineHeight: 22,
           fontWeight: '400',
@@ -82,10 +83,10 @@ export default function ReasoningCard({ scan, breakdown }: ReasoningCardProps) {
       </Text>
 
       {breakdown && (
-        <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#181818' }}>
+        <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#242424' }}>
           <Text
             style={{
-              color: '#333333',
+              color: colors.subtle,
               fontSize: 10,
               fontWeight: '700',
               letterSpacing: 1.5,

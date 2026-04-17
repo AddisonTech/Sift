@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import type { LocalAlternative } from '../../lib/types';
 import { formatDistance } from '../../lib/utils';
+import { colors } from '../../lib/theme';
 
 interface LocalAlternativeCardProps {
   alternative: LocalAlternative;
@@ -17,13 +18,13 @@ function StarRating({ rating }: { rating: number }) {
           key={i}
           style={{
             fontSize: 10,
-            color: i < full || (i === full && half) ? '#FFB300' : '#222222',
+            color: i < full || (i === full && half) ? colors.warning : '#2E2E2E',
           }}
         >
           ★
         </Text>
       ))}
-      <Text style={{ color: '#555555', fontSize: 10, marginLeft: 3 }}>{rating.toFixed(1)}</Text>
+      <Text style={{ color: colors.subtle, fontSize: 10, marginLeft: 3 }}>{rating.toFixed(1)}</Text>
     </View>
   );
 }
@@ -32,9 +33,9 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
   return (
     <View
       style={{
-        backgroundColor: '#111111',
+        backgroundColor: colors.card,
         borderWidth: 1,
-        borderColor: '#1E1E1E',
+        borderColor: colors.border,
         borderRadius: 16,
         padding: 14,
         marginRight: 10,
@@ -42,7 +43,7 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
       }}
     >
       <Text
-        style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 13, marginBottom: 4, lineHeight: 18 }}
+        style={{ color: colors.text, fontWeight: '600', fontSize: 13, marginBottom: 4, lineHeight: 18 }}
         numberOfLines={2}
       >
         {alternative.name}
@@ -56,13 +57,13 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: '#00D1FF', fontSize: 10, fontWeight: '600' }}>
+          <Text style={{ color: colors.accent, fontSize: 10, fontWeight: '600' }}>
             {formatDistance(alternative.distance_km)}
           </Text>
         </View>
       </View>
       <Text
-        style={{ color: '#444444', fontSize: 11, lineHeight: 16, marginBottom: 8 }}
+        style={{ color: '#565656', fontSize: 11, lineHeight: 16, marginBottom: 8 }}
         numberOfLines={2}
       >
         {alternative.address}
@@ -70,7 +71,7 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         {alternative.rating !== null && <StarRating rating={alternative.rating} />}
         {alternative.price_level !== null && (
-          <Text style={{ color: '#555555', fontSize: 11 }}>
+          <Text style={{ color: colors.subtle, fontSize: 11 }}>
             {'$'.repeat(Math.min(alternative.price_level, 4))}
           </Text>
         )}
