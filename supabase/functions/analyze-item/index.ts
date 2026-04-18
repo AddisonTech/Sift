@@ -14,8 +14,9 @@ interface UserPreferences {
 }
 
 interface RequestBody {
-  imageBase64: string;
-  mimeType: string;
+  imageBase64?: string;
+  mimeType?: string;
+  textQuery?: string;
   location: { lat: number; lng: number } | null;
   preferences: UserPreferences;
 }
@@ -69,14 +70,18 @@ serve(async (req: Request) => {
 
   try {
     const body: RequestBody = await req.json();
-    const { imageBase64, mimeType, preferences } = body;
+    const { imageBase64, mimeType, textQuery, preferences } = body;
+
+    if (!textQuery && (!imageBase64 || !mimeType)) {
+      throw new Error('Either textQuery or imageBase64 + mimeType must be provided');
+    }
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    const systemPrompt = `You are Sift, a personal decision engine. Analyze the item in the image and return a JSON object.
+    const systemPrompt = `You are Sift, a personal decision engine. Analyze the item and return a JSON object.
 
 Based on the user's preferences (weights 1-10: price=${preferences.price_weight}, quality=${preferences.quality_weight}, ethics=${preferences.ethics_weight}, health=${preferences.health_weight}, speed=${preferences.speed_weight}, budget=${preferences.budget}, dietary=${preferences.dietary.join(',')}):
 
@@ -102,25 +107,20 @@ Verdict rules:
 - For restaurants/food: Go (score ≥65), Watch (50-64), Pass (<50)
 - Be confident. Never hedge. If the score is 72, say it clearly.`;
 
+    const parts: object[] = textQuery
+      ? [{ text: `${systemPrompt}\n\nUser query: "${textQuery}"` }]
+      : [
+          { text: systemPrompt },
+          { inlineData: { mimeType, data: imageBase64 } },
+        ];
+
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt },
-                {
-                  inlineData: {
-                    mimeType,
-                    data: imageBase64,
-                  },
-                },
-              ],
-            },
-          ],
+          contents: [{ parts }],
           generationConfig: {
             responseMimeType: 'application/json',
             temperature: 0.4,

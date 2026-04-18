@@ -5,12 +5,13 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
+  Platform,
+  TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import * as Location from 'expo-location';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -19,19 +20,258 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { supabase } from '../../lib/supabase';
 import { useSiftStore } from '../../store';
-import { usePreferences } from '../../hooks/usePreferences';
+import { useAnalyzePipeline } from '../../hooks/useAnalyzePipeline';
 import { colors } from '../../lib/theme';
 import SiftCamera, { type SiftCameraRef } from '../../components/camera/SiftCamera';
-import type { ScanResult, ItemCategory, VerdictType } from '../../lib/types';
 
-export default function ScanScreen() {
+// ── Web: text-describe interface ─────────────────────────────────────────────
+
+function WebScanScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const inputRef = useRef<TextInput>(null);
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [focused, setFocused] = useState(false);
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
+
+  const { analyze, isAnalyzing } = useAnalyzePipeline();
+
+  const flashOpacity = useSharedValue(0);
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flashOpacity.value }));
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', data.user.id)
+          .single()
+          .then(({ data: profile }) => setUserAvatarUrl(profile?.avatar_url ?? null));
+      }
+    });
+  }, []);
+
+  const handleSubmit = async () => {
+    const trimmed = query.trim();
+    if (!trimmed || isAnalyzing) return;
+    setError(null);
+    flashOpacity.value = withSequence(
+      withTiming(0.25, { duration: 60 }),
+      withTiming(0, { duration: 240 }),
+    );
+    inputRef.current?.blur();
+    await analyze({ textQuery: trimmed }, setError);
+  };
+
+  const canSubmit = query.trim().length > 0 && !isAnalyzing;
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: '#000000' }}
+      behavior="padding"
+    >
+      {/* Flash overlay */}
+      <Animated.View
+        pointerEvents="none"
+        style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF' }, flashStyle]}
+      />
+
+      <LinearGradient
+        colors={['rgba(0,0,0,0.72)', 'rgba(0,0,0,0.32)', 'transparent']}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 180 }}
+        pointerEvents="none"
+      />
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.88)']}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 260 }}
+        pointerEvents="none"
+      />
+
+      {/* Header */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 14,
+        }}
+        pointerEvents="box-none"
+      >
+        <Text style={{ fontSize: 22, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.5 }}>
+          Sift
+        </Text>
+        {userAvatarUrl ? (
+          <Image
+            source={{ uri: userAvatarUrl }}
+            style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)' }}
+          />
+        ) : (
+          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.15)' }} />
+        )}
+      </View>
+
+      {/* Center content */}
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+        <View
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 20,
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 20,
+          }}
+        >
+          <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+            <Circle cx={11} cy={11} r={7} stroke={colors.primary} strokeWidth={2} />
+            <Path d="M17 17l3.5 3.5" stroke={colors.primary} strokeWidth={2} strokeLinecap="round" />
+          </Svg>
+        </View>
+
+        <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 20, letterSpacing: -0.4, marginBottom: 6, textAlign: 'center' }}>
+          Describe what to evaluate
+        </Text>
+        <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, textAlign: 'center', marginBottom: 28 }}>
+          Type the product, place, or food you want scored
+        </Text>
+
+        {/* Input */}
+        <View
+          style={{
+            width: '100%',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: focused ? `${colors.primary}60` : 'rgba(255,255,255,0.12)',
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+            <Circle cx={11} cy={11} r={7} stroke={focused ? colors.primary : 'rgba(255,255,255,0.35)'} strokeWidth={2} />
+            <Path d="M17 17l3.5 3.5" stroke={focused ? colors.primary : 'rgba(255,255,255,0.35)'} strokeWidth={2} strokeLinecap="round" />
+          </Svg>
+          <TextInput
+            ref={inputRef}
+            value={query}
+            onChangeText={setQuery}
+            placeholder='e.g. "Starbucks caramel macchiato"'
+            placeholderTextColor="rgba(255,255,255,0.25)"
+            style={{ flex: 1, color: '#FFFFFF', fontSize: 14 }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onSubmitEditing={handleSubmit}
+            returnKeyType="search"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isAnalyzing}
+          />
+          {query.length > 0 && !isAnalyzing && (
+            <Pressable onPress={() => setQuery('')} hitSlop={8}>
+              <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: 16 }}>×</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      {/* Error banner */}
+      {error && (
+        <View
+          style={{
+            position: 'absolute',
+            left: 16,
+            right: 16,
+            bottom: insets.bottom + 116,
+            backgroundColor: `${colors.danger}1F`,
+            borderWidth: 1,
+            borderColor: `${colors.danger}40`,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+          }}
+        >
+          <Text style={{ color: colors.danger, fontSize: 13, textAlign: 'center' }}>{error}</Text>
+        </View>
+      )}
+
+      {/* Bottom button — matches camera shutter position */}
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          paddingBottom: insets.bottom + 28,
+        }}
+      >
+        {isAnalyzing ? (
+          <View style={{ alignItems: 'center', gap: 12 }}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 0.5 }}>
+              Analyzing…
+            </Text>
+          </View>
+        ) : (
+          <Pressable
+            onPress={handleSubmit}
+            disabled={!canSubmit}
+            style={({ pressed }) => ({
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              borderWidth: 3,
+              borderColor: canSubmit ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)',
+              backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: [{ scale: pressed ? 0.95 : 1 }],
+            })}
+          >
+            <View
+              style={{
+                width: 58,
+                height: 58,
+                borderRadius: 29,
+                backgroundColor: canSubmit ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+                <Circle cx={11} cy={11} r={7} stroke={canSubmit ? colors.primary : 'rgba(255,255,255,0.4)'} strokeWidth={2.5} />
+                <Path d="M17 17l3.5 3.5" stroke={canSubmit ? colors.primary : 'rgba(255,255,255,0.4)'} strokeWidth={2.5} strokeLinecap="round" />
+              </Svg>
+            </View>
+          </Pressable>
+        )}
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+// ── Mobile: camera interface ──────────────────────────────────────────────────
+
+function MobileScanScreen() {
+  const insets = useSafeAreaInsets();
   const cameraRef = useRef<SiftCameraRef>(null);
-  const { preferences } = usePreferences();
-  const { setCurrentScan, addScan, isAnalyzing, setIsAnalyzing } = useSiftStore();
+  const { isAnalyzing, setIsAnalyzing } = useSiftStore();
+  const { analyze } = useAnalyzePipeline();
 
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
@@ -50,7 +290,6 @@ export default function ScanScreen() {
       -1,
       false,
     );
-
     pulseOpacity.value = withRepeat(
       withSequence(
         withTiming(0.4, { duration: 1200, easing: Easing.out(Easing.quad) }),
@@ -59,7 +298,6 @@ export default function ScanScreen() {
       -1,
       false,
     );
-
     pulseScale.value = withRepeat(
       withSequence(
         withTiming(1.22, { duration: 1200, easing: Easing.out(Easing.quad) }),
@@ -76,21 +314,13 @@ export default function ScanScreen() {
           .select('avatar_url')
           .eq('id', data.user.id)
           .single()
-          .then(({ data: profile }) => {
-            setUserAvatarUrl(profile?.avatar_url ?? null);
-          });
+          .then(({ data: profile }) => setUserAvatarUrl(profile?.avatar_url ?? null));
       }
     });
   }, []);
 
-  const flashStyle = useAnimatedStyle(() => ({
-    opacity: flashOpacity.value,
-  }));
-
-  const bracketStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: bracketScale.value }],
-  }));
-
+  const flashStyle = useAnimatedStyle(() => ({ opacity: flashOpacity.value }));
+  const bracketStyle = useAnimatedStyle(() => ({ transform: [{ scale: bracketScale.value }] }));
   const pulseStyle = useAnimatedStyle(() => ({
     opacity: pulseOpacity.value,
     transform: [{ scale: pulseScale.value }],
@@ -98,125 +328,30 @@ export default function ScanScreen() {
 
   const handleCapture = useCallback(async () => {
     if (isAnalyzing || !cameraRef.current) return;
-
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
     flashOpacity.value = withSequence(
       withTiming(0.6, { duration: 60 }),
       withTiming(0, { duration: 240 }),
     );
-
-    setIsAnalyzing(true);
     setScanError(null);
-
-    try {
-      const base64 = await cameraRef.current.capturePhoto();
-
-      let location: { lat: number; lng: number } | null = null;
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        location = { lat: loc.coords.latitude, lng: loc.coords.longitude };
-      }
-
-      const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
-        'analyze-item',
-        {
-          body: {
-            imageBase64: base64,
-            mimeType: 'image/jpeg',
-            location,
-            preferences,
-          },
-        },
-      );
-
-      if (analysisError || !analysisData) {
-        throw new Error(analysisError?.message ?? 'Analysis failed');
-      }
-
-      const { data: altData } = await supabase.functions.invoke('find-alternatives', {
-        body: {
-          location,
-          item_name: analysisData.item_name,
-          item_category: analysisData.item_category,
-          search_query: analysisData.search_query,
-        },
-      });
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const scanPayload = {
-        user_id: user.id,
-        image_url: null,
-        item_name: analysisData.item_name as string,
-        item_category: (analysisData.item_category ?? 'other') as ItemCategory,
-        score: analysisData.base_score as number,
-        verdict: analysisData.verdict as VerdictType,
-        reasoning: analysisData.reasoning as string,
-        local_alternatives: altData?.local_alternatives ?? [],
-        online_alternatives: altData?.online_alternatives ?? [],
-        location_lat: location?.lat ?? null,
-        location_lng: location?.lng ?? null,
-        raw_response: analysisData,
-      };
-
-      const { data: savedScan, error: saveError } = await supabase
-        .from('scans')
-        .insert(scanPayload)
-        .select()
-        .single();
-
-      if (saveError || !savedScan) throw new Error(saveError?.message ?? 'Save failed');
-
-      const scanResult: ScanResult = {
-        id: savedScan.id,
-        user_id: savedScan.user_id,
-        image_url: savedScan.image_url,
-        item_name: savedScan.item_name,
-        item_category: savedScan.item_category,
-        score: savedScan.score,
-        verdict: savedScan.verdict,
-        reasoning: savedScan.reasoning,
-        local_alternatives: savedScan.local_alternatives ?? [],
-        online_alternatives: savedScan.online_alternatives ?? [],
-        location_lat: savedScan.location_lat,
-        location_lng: savedScan.location_lng,
-        created_at: savedScan.created_at,
-      };
-
-      setCurrentScan(scanResult);
-      addScan(scanResult);
-      router.push(`/results/${savedScan.id}`);
-    } catch (err) {
-      setScanError(err instanceof Error ? err.message : 'Scan failed. Try again.');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [isAnalyzing, preferences]);
+    const base64 = await cameraRef.current.capturePhoto();
+    await analyze({ imageBase64: base64, mimeType: 'image/jpeg' }, setScanError);
+  }, [isAnalyzing, analyze]);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#000000' }}>
-      {/* Camera */}
       <SiftCamera ref={cameraRef} />
 
-      {/* Flash overlay */}
       <Animated.View
         pointerEvents="none"
         style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF' }, flashStyle]}
       />
 
-      {/* Top gradient for header readability */}
       <LinearGradient
         colors={['rgba(0,0,0,0.72)', 'rgba(0,0,0,0.32)', 'transparent']}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 180 }}
         pointerEvents="none"
       />
-
-      {/* Bottom gradient for controls readability */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.85)']}
         style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 220 }}
@@ -244,23 +379,14 @@ export default function ScanScreen() {
         {userAvatarUrl ? (
           <Image
             source={{ uri: userAvatarUrl }}
-            style={{
-              width: 34, height: 34, borderRadius: 17,
-              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)',
-            }}
+            style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)' }}
           />
         ) : (
-          <View
-            style={{
-              width: 34, height: 34, borderRadius: 17,
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.15)',
-            }}
-          />
+          <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.15)' }} />
         )}
       </View>
 
-      {/* Center: bracket overlay + status */}
+      {/* Bracket overlay */}
       <View
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}
         pointerEvents="none"
@@ -290,17 +416,8 @@ export default function ScanScreen() {
             ))}
           </View>
         </Animated.View>
-
         {!isAnalyzing && (
-          <Text
-            style={{
-              color: 'rgba(255,255,255,0.4)',
-              fontSize: 12,
-              marginTop: 20,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-            }}
-          >
+          <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 20, letterSpacing: 1.5, textTransform: 'uppercase' }}>
             Point at anything
           </Text>
         )}
@@ -311,9 +428,7 @@ export default function ScanScreen() {
         <View
           style={{
             position: 'absolute',
-            left: 16,
-            right: 16,
-            bottom: 148,
+            left: 16, right: 16, bottom: 148,
             backgroundColor: `${colors.danger}1F`,
             borderWidth: 1,
             borderColor: `${colors.danger}40`,
@@ -326,13 +441,11 @@ export default function ScanScreen() {
         </View>
       )}
 
-      {/* Bottom controls */}
+      {/* Shutter */}
       <View
         style={{
           position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          bottom: 0, left: 0, right: 0,
           alignItems: 'center',
           paddingBottom: insets.bottom + 28,
         }}
@@ -340,33 +453,23 @@ export default function ScanScreen() {
         {isAnalyzing ? (
           <View style={{ alignItems: 'center', gap: 12 }}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 0.5 }}>
-              Analyzing…
-            </Text>
+            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, letterSpacing: 0.5 }}>Analyzing…</Text>
           </View>
         ) : (
           <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-            {/* Pulse ring */}
             <Animated.View
               pointerEvents="none"
-              style={[
-                {
-                  position: 'absolute',
-                  width: 80,
-                  height: 80,
-                  borderRadius: 40,
-                  borderWidth: 1.5,
-                  borderColor: 'rgba(255,255,255,0.6)',
-                },
-                pulseStyle,
-              ]}
+              style={[{
+                position: 'absolute',
+                width: 80, height: 80, borderRadius: 40,
+                borderWidth: 1.5,
+                borderColor: 'rgba(255,255,255,0.6)',
+              }, pulseStyle]}
             />
             <Pressable
               onPress={handleCapture}
               style={({ pressed }) => ({
-                width: 80,
-                height: 80,
-                borderRadius: 40,
+                width: 80, height: 80, borderRadius: 40,
                 borderWidth: 3,
                 borderColor: 'rgba(255,255,255,0.85)',
                 backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
@@ -380,22 +483,17 @@ export default function ScanScreen() {
                 transform: [{ scale: pressed ? 0.95 : 1 }],
               })}
             >
-              <View
-                style={{
-                  width: 58,
-                  height: 58,
-                  borderRadius: 29,
-                  backgroundColor: '#FFFFFF',
-                  shadowColor: '#FFFFFF',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 8,
-                }}
-              />
+              <View style={{ width: 58, height: 58, borderRadius: 29, backgroundColor: '#FFFFFF' }} />
             </Pressable>
           </View>
         )}
       </View>
     </View>
   );
+}
+
+// ── Entry ─────────────────────────────────────────────────────────────────────
+
+export default function ScanScreen() {
+  return Platform.OS === 'web' ? <WebScanScreen /> : <MobileScanScreen />;
 }
