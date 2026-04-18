@@ -37,7 +37,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
             height: 56,
             borderRadius: 10,
             marginRight: 14,
-            backgroundColor: '#242424',
+            backgroundColor: colors.border,
           }}
           resizeMode="cover"
         />
@@ -48,7 +48,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
             height: 56,
             borderRadius: 10,
             marginRight: 14,
-            backgroundColor: '#242424',
+            backgroundColor: colors.border,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -64,7 +64,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
         >
           {alternative.name}
         </Text>
-        <Text style={{ color: '#565656', fontSize: 11, marginBottom: 4 }}>{alternative.merchant}</Text>
+        <Text style={{ color: colors.subtle, fontSize: 11, marginBottom: 4 }}>{alternative.merchant}</Text>
         <Text style={{ color: colors.success, fontWeight: '700', fontSize: 14 }}>
           {formatPrice(alternative.price, alternative.currency)}
         </Text>

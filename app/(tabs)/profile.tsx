@@ -131,7 +131,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: '#0A0A0A' }}
+      style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 48 }}
       showsVerticalScrollIndicator={false}
     >
@@ -148,9 +148,9 @@ export default function ProfileScreen() {
             width: 52,
             height: 52,
             borderRadius: 26,
-            backgroundColor: '#1A1A1A',
+            backgroundColor: colors.surface,
             borderWidth: 1,
-            borderColor: '#252525',
+            borderColor: colors.border,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 14,
@@ -160,7 +160,7 @@ export default function ProfileScreen() {
             {displayName ? displayName[0].toUpperCase() : '?'}
           </Text>
         </View>
-        <Text style={{ fontSize: 26, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.8 }}>
+        <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.8 }}>
           {displayName || 'Guest'}
         </Text>
         {email ? (
@@ -180,13 +180,13 @@ export default function ProfileScreen() {
                 paddingHorizontal: 16,
                 paddingVertical: 14,
                 borderBottomWidth: index < WEIGHT_FIELDS.length - 1 ? 1 : 0,
-                borderBottomColor: '#242424',
+                borderBottomColor: colors.border,
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                 <Text style={{ fontSize: 14, marginRight: 8 }}>{icon}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>{label}</Text>
+                  <Text style={{ color: colors.text, fontWeight: '600', fontSize: 14 }}>{label}</Text>
                   <Text style={{ color: colors.subtle, fontSize: 11, marginTop: 1 }}>{description}</Text>
                 </View>
                 <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 14 }}>
@@ -279,8 +279,8 @@ export default function ProfileScreen() {
                   key={tag}
                   onPress={() => toggleDietary(tag)}
                   style={{
-                    backgroundColor: active ? 'rgba(108,71,255,0.15)' : '#111111',
-                    borderColor: active ? 'rgba(108,71,255,0.5)' : '#1E1E1E',
+                    backgroundColor: active ? `${colors.primary}26` : colors.surface,
+                    borderColor: active ? `${colors.primary}80` : colors.border,
                     borderWidth: 1,
                     borderRadius: 99,
                     paddingHorizontal: 14,
@@ -289,7 +289,7 @@ export default function ProfileScreen() {
                 >
                   <Text
                     style={{
-                      color: active ? '#8B6FFF' : '#555555',
+                      color: active ? colors.primary : colors.subtle,
                       fontSize: 13,
                       fontWeight: '600',
                     }}
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
               }}
             >
               <View style={{ flex: 1, marginRight: 16 }}>
-                <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>
+                <Text style={{ color: colors.text, fontSize: 14, fontWeight: '500' }}>
                   Avoid chain restaurants
                 </Text>
                 <Text style={{ color: colors.subtle, fontSize: 12, marginTop: 2 }}>
@@ -327,7 +327,7 @@ export default function ProfileScreen() {
                 value={preferences.avoid_chains}
                 onValueChange={(v) => updatePreferences({ avoid_chains: v })}
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#FFFFFF"
+                thumbColor={colors.text}
               />
             </View>
           </SectionCard>
@@ -337,9 +337,9 @@ export default function ProfileScreen() {
         <Pressable
           onPress={handleSignOut}
           style={({ pressed }) => ({
-            backgroundColor: pressed ? '#1A0A0F' : 'transparent',
+            backgroundColor: pressed ? `${colors.danger}18` : 'transparent',
             borderWidth: 1,
-            borderColor: 'rgba(255,61,113,0.2)',
+            borderColor: `${colors.danger}33`,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',
@@ -347,10 +347,10 @@ export default function ProfileScreen() {
             marginBottom: 4,
           })}
         >
-          <Text style={{ color: '#FF3D71', fontWeight: '600', fontSize: 14 }}>Sign Out</Text>
+          <Text style={{ color: colors.danger, fontWeight: '600', fontSize: 14 }}>Sign Out</Text>
         </Pressable>
 
-        <Text style={{ color: '#383838', fontSize: 11, textAlign: 'center', marginTop: 16 }}>
+        <Text style={{ color: colors.placeholder, fontSize: 11, textAlign: 'center', marginTop: 16 }}>
           Sift v1.0.0
         </Text>
       </View>

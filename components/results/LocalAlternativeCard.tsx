@@ -63,7 +63,7 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
         </View>
       </View>
       <Text
-        style={{ color: '#565656', fontSize: 11, lineHeight: 16, marginBottom: 8 }}
+        style={{ color: colors.subtle, fontSize: 11, lineHeight: 16, marginBottom: 8 }}
         numberOfLines={2}
       >
         {alternative.address}

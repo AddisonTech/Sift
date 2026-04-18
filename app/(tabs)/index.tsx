@@ -39,12 +39,31 @@ export default function ScanScreen() {
   const flashOpacity = useSharedValue(0);
   const bracketScale = useSharedValue(1);
   const pulseOpacity = useSharedValue(0);
+  const pulseScale = useSharedValue(1);
 
   React.useEffect(() => {
     bracketScale.value = withRepeat(
       withSequence(
         withTiming(1.05, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
         withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      false,
+    );
+
+    pulseOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.4, { duration: 1200, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 1200, easing: Easing.in(Easing.quad) }),
+      ),
+      -1,
+      false,
+    );
+
+    pulseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.22, { duration: 1200, easing: Easing.out(Easing.quad) }),
+        withTiming(1, { duration: 1200, easing: Easing.in(Easing.quad) }),
       ),
       -1,
       false,
@@ -70,6 +89,11 @@ export default function ScanScreen() {
 
   const bracketStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bracketScale.value }],
+  }));
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    opacity: pulseOpacity.value,
+    transform: [{ scale: pulseScale.value }],
   }));
 
   const handleCapture = useCallback(async () => {
@@ -182,7 +206,7 @@ export default function ScanScreen() {
       {/* Flash overlay */}
       <Animated.View
         pointerEvents="none"
-        style={[{ position: 'absolute', inset: 0, backgroundColor: '#FFFFFF' }, flashStyle]}
+        style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#FFFFFF' }, flashStyle]}
       />
 
       {/* Top gradient for header readability */}
@@ -238,12 +262,11 @@ export default function ScanScreen() {
 
       {/* Center: bracket overlay + status */}
       <View
-        style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center' }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}
         pointerEvents="none"
       >
         <Animated.View style={bracketStyle}>
           <View style={{ width: 240, height: 240 }}>
-            {/* Corner brackets with glow */}
             {[
               { top: 0, left: 0, borderTopWidth: 2.5, borderLeftWidth: 2.5, borderTopLeftRadius: 8 },
               { top: 0, right: 0, borderTopWidth: 2.5, borderRightWidth: 2.5, borderTopRightRadius: 8 },
@@ -291,15 +314,15 @@ export default function ScanScreen() {
             left: 16,
             right: 16,
             bottom: 148,
-            backgroundColor: 'rgba(255,61,113,0.12)',
+            backgroundColor: `${colors.danger}1F`,
             borderWidth: 1,
-            borderColor: 'rgba(255,61,113,0.25)',
+            borderColor: `${colors.danger}40`,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 10,
           }}
         >
-          <Text style={{ color: '#FF3D71', fontSize: 13, textAlign: 'center' }}>{scanError}</Text>
+          <Text style={{ color: colors.danger, fontSize: 13, textAlign: 'center' }}>{scanError}</Text>
         </View>
       )}
 
@@ -322,38 +345,55 @@ export default function ScanScreen() {
             </Text>
           </View>
         ) : (
-          <Pressable
-            onPress={handleCapture}
-            style={({ pressed }) => ({
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              borderWidth: 3,
-              borderColor: 'rgba(255,255,255,0.85)',
-              backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#FFFFFF',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: pressed ? 0.3 : 0.12,
-              shadowRadius: 16,
-              elevation: 8,
-              transform: [{ scale: pressed ? 0.95 : 1 }],
-            })}
-          >
-            <View
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 29,
-                backgroundColor: '#FFFFFF',
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            {/* Pulse ring */}
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                {
+                  position: 'absolute',
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  borderWidth: 1.5,
+                  borderColor: 'rgba(255,255,255,0.6)',
+                },
+                pulseStyle,
+              ]}
+            />
+            <Pressable
+              onPress={handleCapture}
+              style={({ pressed }) => ({
+                width: 80,
+                height: 80,
+                borderRadius: 40,
+                borderWidth: 3,
+                borderColor: 'rgba(255,255,255,0.85)',
+                backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+                alignItems: 'center',
+                justifyContent: 'center',
                 shadowColor: '#FFFFFF',
                 shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.4,
-                shadowRadius: 8,
-              }}
-            />
-          </Pressable>
+                shadowOpacity: pressed ? 0.3 : 0.12,
+                shadowRadius: 16,
+                elevation: 8,
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              })}
+            >
+              <View
+                style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 29,
+                  backgroundColor: '#FFFFFF',
+                  shadowColor: '#FFFFFF',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 8,
+                }}
+              />
+            </Pressable>
+          </View>
         )}
       </View>
     </View>

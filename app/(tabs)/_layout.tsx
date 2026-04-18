@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
+import { colors } from '../../lib/theme';
 
 function ScanIcon({ color, focused }: { color: string; focused: boolean }) {
   return (
@@ -10,7 +11,7 @@ function ScanIcon({ color, focused }: { color: string; focused: boolean }) {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: focused ? 'rgba(108,71,255,0.18)' : 'transparent',
+        backgroundColor: focused ? `${colors.primary}2E` : 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -59,7 +60,7 @@ export default function TabsLayout() {
           paddingBottom: 14,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#6C47FF',
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: '#505050',
         tabBarLabelStyle: {
           fontSize: 10,

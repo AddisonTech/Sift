@@ -1,5 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import type { ScanResult } from '../../lib/types';
 import { colors } from '../../lib/theme';
 
@@ -26,7 +32,26 @@ const DIMENSIONS: { key: keyof ScoreBreakdown; label: string; icon: string }[] =
 
 function ScoreBar({ label, icon, value }: { label: string; icon: string; value: number }) {
   const pct = Math.max(0, Math.min(100, value));
-  const color = pct >= 70 ? colors.success : pct >= 40 ? colors.warning : colors.danger;
+  const barColor = pct >= 70 ? colors.success : pct >= 40 ? colors.warning : colors.danger;
+  const [containerWidth, setContainerWidth] = useState(0);
+  const animWidth = useSharedValue(0);
+
+  useEffect(() => {
+    if (containerWidth > 0) {
+      const target = (pct / 100) * containerWidth;
+      const timeout = setTimeout(() => {
+        animWidth.value = withTiming(target, {
+          duration: 540,
+          easing: Easing.out(Easing.cubic),
+        });
+      }, 80);
+      return () => clearTimeout(timeout);
+    }
+  }, [containerWidth, pct]);
+
+  const barStyle = useAnimatedStyle(() => ({
+    width: animWidth.value,
+  }));
 
   return (
     <View style={{ marginBottom: 12 }}>
@@ -35,7 +60,7 @@ function ScoreBar({ label, icon, value }: { label: string; icon: string; value: 
           <Text style={{ fontSize: 12 }}>{icon}</Text>
           <Text style={{ color: colors.muted, fontSize: 12, fontWeight: '500' }}>{label}</Text>
         </View>
-        <Text style={{ color, fontSize: 12, fontWeight: '700' }}>{pct}</Text>
+        <Text style={{ color: barColor, fontSize: 12, fontWeight: '700' }}>{pct}</Text>
       </View>
       <View
         style={{
@@ -44,14 +69,17 @@ function ScoreBar({ label, icon, value }: { label: string; icon: string; value: 
           borderRadius: 2,
           overflow: 'hidden',
         }}
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
       >
-        <View
-          style={{
-            height: '100%',
-            width: `${pct}%`,
-            backgroundColor: color,
-            borderRadius: 2,
-          }}
+        <Animated.View
+          style={[
+            {
+              height: '100%',
+              backgroundColor: barColor,
+              borderRadius: 2,
+            },
+            barStyle,
+          ]}
         />
       </View>
     </View>
@@ -73,17 +101,18 @@ export default function ReasoningCard({ scan, breakdown }: ReasoningCardProps) {
     >
       <Text
         style={{
-          color: '#E0E0E0',
+          color: colors.text,
           fontSize: 14,
           lineHeight: 22,
           fontWeight: '400',
+          opacity: 0.88,
         }}
       >
         {scan.reasoning}
       </Text>
 
       {breakdown && (
-        <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: '#242424' }}>
+        <View style={{ marginTop: 20, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
           <Text
             style={{
               color: colors.subtle,

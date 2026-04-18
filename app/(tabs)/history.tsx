@@ -1,8 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, RefreshControl, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { supabase } from '../../lib/supabase';
 import { useSiftStore } from '../../store';
 import { verdictColor } from '../../lib/utils';
@@ -44,7 +50,7 @@ function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) 
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: pressed ? '#1A1A1A' : '#141414',
+        backgroundColor: pressed ? colors.card : colors.surface,
         borderRadius: 16,
         marginHorizontal: 16,
         marginBottom: 10,
@@ -61,7 +67,7 @@ function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) 
             width: 44,
             height: 44,
             borderRadius: 12,
-            backgroundColor: '#1E1E1E',
+            backgroundColor: colors.card,
             alignItems: 'center',
             justifyContent: 'center',
             marginRight: 14,
@@ -74,7 +80,7 @@ function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) 
         {/* Text */}
         <View style={{ flex: 1, marginRight: 12 }}>
           <Text
-            style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14, marginBottom: 4 }}
+            style={{ color: colors.text, fontWeight: '600', fontSize: 14, marginBottom: 4 }}
             numberOfLines={1}
           >
             {scan.item_name}
@@ -106,12 +112,61 @@ function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) 
   );
 }
 
+function AnimatedEmptyState() {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.92);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      opacity.value = withTiming(1, { duration: 360, easing: Easing.out(Easing.cubic) });
+      scale.value = withTiming(1, { duration: 360, easing: Easing.out(Easing.cubic) });
+    }, 120);
+    return () => clearTimeout(t);
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={[{ alignItems: 'center', marginTop: 80, paddingHorizontal: 40 }, style]}>
+      <View
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: 36,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.border,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 20,
+        }}
+      >
+        <Text style={{ fontSize: 32 }}>📷</Text>
+      </View>
+      <Text style={{ color: colors.text, fontWeight: '700', fontSize: 18, marginBottom: 8, textAlign: 'center' }}>
+        Nothing scanned yet
+      </Text>
+      <Text style={{ color: colors.subtle, fontSize: 14, textAlign: 'center', lineHeight: 20 }}>
+        Point your camera at any item to get a score and smarter alternatives.
+      </Text>
+    </Animated.View>
+  );
+}
+
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { scans, setScans } = useSiftStore();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const listOpacity = useSharedValue(0);
+  const listStyle = useAnimatedStyle(() => ({
+    opacity: listOpacity.value,
+  }));
 
   const fetchScans = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -146,7 +201,10 @@ export default function HistoryScreen() {
   }, []);
 
   useEffect(() => {
-    fetchScans().finally(() => setLoading(false));
+    fetchScans().finally(() => {
+      setLoading(false);
+      listOpacity.value = withTiming(1, { duration: 320, easing: Easing.out(Easing.cubic) });
+    });
   }, []);
 
   const onRefresh = useCallback(async () => {
@@ -164,13 +222,13 @@ export default function HistoryScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={{ paddingHorizontal: 20, paddingTop: insets.top + 20, paddingBottom: 16 }}>
         <Text
           style={{
             fontSize: 30,
             fontWeight: '800',
-            color: '#FFFFFF',
+            color: colors.text,
             letterSpacing: -1,
           }}
         >
@@ -183,47 +241,27 @@ export default function HistoryScreen() {
         )}
       </View>
 
-      <FlashList
-        data={scans}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ScanItem
-            scan={item}
-            onPress={() => router.push(`/results/${item.id}`)}
-          />
-        )}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-          />
-        }
-        ListEmptyComponent={
-          <View style={{ alignItems: 'center', marginTop: 80, paddingHorizontal: 40 }}>
-            <View
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 36,
-                backgroundColor: '#141414',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 20,
-              }}
-            >
-              <Text style={{ fontSize: 32 }}>📷</Text>
-            </View>
-            <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 18, marginBottom: 8, textAlign: 'center' }}>
-              Nothing scanned yet
-            </Text>
-            <Text style={{ color: '#444444', fontSize: 14, textAlign: 'center', lineHeight: 20 }}>
-              Point your camera at any item to get a score and smarter alternatives.
-            </Text>
-          </View>
-        }
-        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
-      />
+      <Animated.View style={[{ flex: 1 }, listStyle]}>
+        <FlashList
+          data={scans}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ScanItem
+              scan={item}
+              onPress={() => router.push(`/results/${item.id}`)}
+            />
+          )}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
+          }
+          ListEmptyComponent={<AnimatedEmptyState />}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        />
+      </Animated.View>
     </View>
   );
 }
