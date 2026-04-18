@@ -1,4 +1,4 @@
-import type { VerdictType, ItemCategory, UserPreferences } from './types';
+import type { VerdictType, UserPreferences } from './types';
 
 export function verdictColor(verdict: VerdictType): string {
   switch (verdict) {
@@ -15,9 +15,6 @@ export function verdictColor(verdict: VerdictType): string {
   }
 }
 
-export function verdictLabel(category: ItemCategory, verdict: VerdictType): string {
-  return verdict;
-}
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');

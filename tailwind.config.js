@@ -16,6 +16,8 @@ module.exports = {
         danger:     'rgb(255 61 113 / <alpha-value>)',
         text:       'rgb(255 255 255 / <alpha-value>)',
         muted:      'rgb(158 158 158 / <alpha-value>)',
+        subtle:     'rgb(85 85 85 / <alpha-value>)',
+        placeholder:'rgb(48 48 48 / <alpha-value>)',
       },
     },
   },

@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { supabase } from '../lib/supabase';
+import { colors } from '../lib/theme';
 import type { Session } from '@supabase/supabase-js';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
@@ -70,7 +71,7 @@ export default function RootLayout() {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <View style={{ flex: 1, backgroundColor: '#0A0A0A' }} />
+          <View style={{ flex: 1, backgroundColor: colors.background }} />
         </SafeAreaProvider>
       </GestureHandlerRootView>
     );
@@ -82,7 +83,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: '#0A0A0A' },
+            contentStyle: { backgroundColor: colors.background },
             animation: 'fade',
           }}
         />

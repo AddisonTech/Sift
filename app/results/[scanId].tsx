@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -114,6 +115,14 @@ export default function ResultsScreen() {
     loadScan();
   }, [scanId]);
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   const handleShare = async () => {
     if (!scan) return;
     await Share.share({
@@ -135,7 +144,7 @@ export default function ResultsScreen() {
         <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', marginBottom: 8 }}>
           Scan not found
         </Text>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={handleBack}>
           <Text style={{ color: colors.primary, fontSize: 14 }}>Go back</Text>
         </Pressable>
       </View>
@@ -145,13 +154,49 @@ export default function ResultsScreen() {
   const color = verdictColor(scan.verdict);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0A0A0A' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Ambient verdict color glow at top */}
       <LinearGradient
         colors={[`${color}1A`, `${color}06`, '#0A0A0A00']}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 320 }}
         pointerEvents="none"
       />
+
+      {/* Back button */}
+      <View
+        style={{
+          position: 'absolute',
+          top: insets.top + 12,
+          left: 16,
+          zIndex: 10,
+        }}
+        pointerEvents="box-none"
+      >
+        <Pressable
+          onPress={handleBack}
+          hitSlop={12}
+          style={({ pressed }) => ({
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: pressed ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          })}
+        >
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M15 19l-7-7 7-7"
+              stroke={colors.text}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        </Pressable>
+      </View>
 
       <Animated.ScrollView
         style={[{ flex: 1 }, contentStyle]}
@@ -173,7 +218,7 @@ export default function ResultsScreen() {
             <View
               style={{
                 position: 'absolute',
-                inset: 0,
+                top: 0, left: 0, right: 0, bottom: 0,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
@@ -188,7 +233,7 @@ export default function ResultsScreen() {
           <VerdictBadge verdict={scan.verdict} />
           <Text
             style={{
-              color: '#FFFFFF',
+              color: colors.text,
               fontWeight: '800',
               fontSize: 22,
               letterSpacing: -0.5,
@@ -269,7 +314,7 @@ export default function ResultsScreen() {
           paddingBottom: insets.bottom + 14,
           paddingTop: 14,
           borderTopWidth: 1,
-          borderTopColor: '#141414',
+          borderTopColor: colors.surface,
           backgroundColor: 'rgba(10,10,10,0.96)',
         }}
       >
@@ -277,15 +322,15 @@ export default function ResultsScreen() {
           onPress={() => router.replace('/(tabs)')}
           style={({ pressed }) => ({
             flex: 1,
-            backgroundColor: pressed ? '#1A1A1A' : '#141414',
+            backgroundColor: pressed ? colors.card : colors.surface,
             borderWidth: 1,
-            borderColor: '#252525',
+            borderColor: colors.border,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',
           })}
         >
-          <Text style={{ color: '#FFFFFF', fontWeight: '600', fontSize: 14 }}>Scan Again</Text>
+          <Text style={{ color: colors.text, fontWeight: '600', fontSize: 14 }}>Scan Again</Text>
         </Pressable>
         <Pressable
           onPress={handleShare}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { scoreColor } from '../../lib/utils';
+import { colors } from '../../lib/theme';
 
 interface ScoreRingProps {
   score: number;
@@ -44,7 +45,7 @@ export default function ScoreRing({ score, size }: ScoreRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#2A2A2A"
+          stroke={colors.border}
           strokeWidth={strokeWidth}
           fill="none"
         />

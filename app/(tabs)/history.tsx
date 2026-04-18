@@ -17,9 +17,24 @@ const CATEGORY_ICONS: Record<ItemCategory, string> = {
   other: '🔍',
 };
 
+function relativeDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMinutes < 1) return 'just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 function ScanItem({ scan, onPress }: { scan: ScanResult; onPress: () => void }) {
-  const date = new Date(scan.created_at);
-  const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const dateStr = relativeDate(scan.created_at);
   const icon = CATEGORY_ICONS[scan.item_category] ?? '🔍';
   const color = verdictColor(scan.verdict);
 
