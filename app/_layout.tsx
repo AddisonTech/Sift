@@ -26,6 +26,8 @@ export default function RootLayout() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
+    }).catch(() => {
+      setSession(null);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -42,6 +44,8 @@ export default function RootLayout() {
     if (session === undefined) return;
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
       setOnboardingDone(val === 'true');
+    }).catch(() => {
+      setOnboardingDone(false);
     });
   }, [session]);
 
