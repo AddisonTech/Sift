@@ -253,19 +253,28 @@ export default function ResultsScreen() {
         {/* ── Local alternatives ── */}
         {scan.local_alternatives.length > 0 && (
           <View style={{ marginBottom: 16 }}>
-            <Text
+            <View
               style={{
-                color: colors.subtle,
-                fontSize: 10,
-                fontWeight: '700',
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
+                flexDirection: 'row',
+                alignItems: 'center',
                 paddingHorizontal: 20,
                 marginBottom: 12,
+                gap: 10,
               }}
             >
-              Nearby
-            </Text>
+              <Text
+                style={{
+                  color: colors.subtle,
+                  fontSize: 10,
+                  fontWeight: '700',
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Nearby
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -281,22 +290,69 @@ export default function ResultsScreen() {
         {/* ── Online alternatives ── */}
         {scan.online_alternatives.length > 0 && (
           <View style={{ marginBottom: 16 }}>
-            <Text
+            <View
               style={{
-                color: colors.subtle,
-                fontSize: 10,
-                fontWeight: '700',
-                letterSpacing: 1.5,
-                textTransform: 'uppercase',
+                flexDirection: 'row',
+                alignItems: 'center',
                 paddingHorizontal: 20,
                 marginBottom: 12,
+                gap: 10,
               }}
             >
-              Online
-            </Text>
+              <Text
+                style={{
+                  color: colors.subtle,
+                  fontSize: 10,
+                  fontWeight: '700',
+                  letterSpacing: 1.5,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Online
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+            </View>
             {scan.online_alternatives.map((alt) => (
               <OnlineAlternativeCard key={alt.id} alternative={alt} />
             ))}
+          </View>
+        )}
+
+        {/* ── Empty alternatives ── */}
+        {scan.local_alternatives.length === 0 && scan.online_alternatives.length === 0 && (
+          <View
+            style={{
+              marginHorizontal: 16,
+              marginBottom: 16,
+              backgroundColor: colors.card,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: colors.border,
+              padding: 24,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 28, marginBottom: 10 }}>🔍</Text>
+            <Text
+              style={{
+                color: colors.text,
+                fontWeight: '600',
+                fontSize: 14,
+                marginBottom: 6,
+              }}
+            >
+              No alternatives found
+            </Text>
+            <Text
+              style={{
+                color: colors.subtle,
+                fontSize: 12,
+                textAlign: 'center',
+                lineHeight: 18,
+              }}
+            >
+              Enable location or adjust your search radius in Profile to see nearby options.
+            </Text>
           </View>
         )}
       </Animated.ScrollView>
@@ -315,7 +371,7 @@ export default function ResultsScreen() {
           paddingTop: 14,
           borderTopWidth: 1,
           borderTopColor: colors.surface,
-          backgroundColor: 'rgba(10,10,10,0.96)',
+          backgroundColor: `${colors.background}F5`,
         }}
       >
         <Pressable

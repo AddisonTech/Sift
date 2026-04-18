@@ -29,21 +29,43 @@ function ScanIcon({ color, focused }: { color: string; focused: boolean }) {
   );
 }
 
-function HistoryIcon({ color }: { color: string }) {
+function HistoryIcon({ color, focused }: { color: string; focused: boolean }) {
   return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={2} />
-      <Path d="M12 7v5l3 3" stroke={color} strokeWidth={2} strokeLinecap="round" />
-    </Svg>
+    <View
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: focused ? `${colors.primary}2E` : 'transparent',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+        <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={2} />
+        <Path d="M12 7v5l3 3" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      </Svg>
+    </View>
   );
 }
 
-function ProfileIcon({ color }: { color: string }) {
+function ProfileIcon({ color, focused }: { color: string; focused: boolean }) {
   return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Circle cx={12} cy={8} r={4} stroke={color} strokeWidth={2} />
-      <Path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke={color} strokeWidth={2} strokeLinecap="round" />
-    </Svg>
+    <View
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: focused ? `${colors.primary}2E` : 'transparent',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+        <Circle cx={12} cy={8} r={4} stroke={color} strokeWidth={2} />
+        <Path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      </Svg>
+    </View>
   );
 }
 
@@ -53,15 +75,15 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0D0D0D',
-          borderTopColor: '#161616',
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           height: 76,
           paddingBottom: 14,
           paddingTop: 8,
         },
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#505050',
+        tabBarInactiveTintColor: colors.subtle,
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
@@ -80,14 +102,14 @@ export default function TabsLayout() {
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color }) => <HistoryIcon color={color} />,
+          tabBarIcon: ({ color, focused }) => <HistoryIcon color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <ProfileIcon color={color} />,
+          tabBarIcon: ({ color, focused }) => <ProfileIcon color={color} focused={focused} />,
         }}
       />
     </Tabs>

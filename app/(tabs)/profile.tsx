@@ -6,12 +6,14 @@ import {
   Pressable,
   Switch,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import PreferenceSlider from '../../components/ui/PreferenceSlider';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
 import { usePreferences } from '../../hooks/usePreferences';
+import { useSiftStore } from '../../store';
 import type { UserPreferences } from '../../lib/types';
 import { colors } from '../../lib/theme';
 
@@ -84,6 +86,11 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { preferences, updatePreferences } = usePreferences();
+  const { scans } = useSiftStore();
+
+  const avgScore = scans.length > 0
+    ? Math.round(scans.reduce((acc, s) => acc + s.score, 0) / scans.length)
+    : null;
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -143,29 +150,70 @@ export default function ProfileScreen() {
           paddingBottom: 28,
         }}
       >
-        <View
+        {/* Avatar with gradient ring */}
+        <LinearGradient
+          colors={[`${colors.primary}99`, `${colors.primary}33`]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={{
-            width: 52,
-            height: 52,
-            borderRadius: 26,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.border,
+            width: 60,
+            height: 60,
+            borderRadius: 30,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 14,
           }}
         >
-          <Text style={{ fontSize: 22 }}>
-            {displayName ? displayName[0].toUpperCase() : '?'}
-          </Text>
-        </View>
+          <View
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 27,
+              backgroundColor: colors.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text }}>
+              {displayName ? displayName[0].toUpperCase() : '?'}
+            </Text>
+          </View>
+        </LinearGradient>
+
         <Text style={{ fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.8 }}>
           {displayName || 'Guest'}
         </Text>
         {email ? (
           <Text style={{ color: colors.subtle, fontSize: 13, marginTop: 3 }}>{email}</Text>
         ) : null}
+
+        {/* Stats row */}
+        {scans.length > 0 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 16,
+              gap: 0,
+            }}
+          >
+            <View style={{ alignItems: 'center', paddingRight: 20 }}>
+              <Text style={{ color: colors.text, fontWeight: '700', fontSize: 20, letterSpacing: -0.5 }}>
+                {scans.length}
+              </Text>
+              <Text style={{ color: colors.subtle, fontSize: 11, marginTop: 1 }}>Scans</Text>
+            </View>
+            <View style={{ width: 1, height: 32, backgroundColor: colors.border }} />
+            {avgScore !== null && (
+              <View style={{ alignItems: 'center', paddingLeft: 20 }}>
+                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 20, letterSpacing: -0.5 }}>
+                  {avgScore}
+                </Text>
+                <Text style={{ color: colors.subtle, fontSize: 11, marginTop: 1 }}>Avg Score</Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
 
       <View style={{ paddingHorizontal: 16 }}>

@@ -73,7 +73,7 @@ export default function OnlineAlternativeCard({ alternative }: OnlineAlternative
       <Pressable
         onPress={handleView}
         style={({ pressed }) => ({
-          backgroundColor: pressed ? 'rgba(108,71,255,0.25)' : 'rgba(108,71,255,0.12)',
+          backgroundColor: pressed ? `${colors.primary}40` : `${colors.primary}1F`,
           borderRadius: 10,
           paddingHorizontal: 12,
           paddingVertical: 8,

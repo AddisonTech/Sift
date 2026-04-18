@@ -18,7 +18,7 @@ function StarRating({ rating }: { rating: number }) {
           key={i}
           style={{
             fontSize: 10,
-            color: i < full || (i === full && half) ? colors.warning : '#2E2E2E',
+            color: i < full || (i === full && half) ? colors.warning : colors.border,
           }}
         >
           ★
@@ -51,7 +51,7 @@ export default function LocalAlternativeCard({ alternative }: LocalAlternativeCa
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
         <View
           style={{
-            backgroundColor: 'rgba(0,209,255,0.1)',
+            backgroundColor: `${colors.accent}1A`,
             borderRadius: 99,
             paddingHorizontal: 7,
             paddingVertical: 2,
