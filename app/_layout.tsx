@@ -1,6 +1,6 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,6 +11,28 @@ import type { Session } from '@supabase/supabase-js';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: string | null }
+> {
+  state = { error: null };
+  static getDerivedStateFromError(e: Error) {
+    return { error: e.message };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <Text style={{ color: '#FF3D71', fontSize: 13, textAlign: 'center' }}>
+            {this.state.error}
+          </Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
@@ -20,6 +42,15 @@ export default function RootLayout() {
 
   useEffect(() => {
     setNavigatorReady(true);
+  }, []);
+
+  // Hard timeout: if still loading after 4s, treat as unauthenticated
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSession(s => s === undefined ? null : s);
+      setOnboardingDone(d => d === null ? false : d);
+    }, 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   // Subscribe to auth state changes
@@ -38,8 +69,6 @@ export default function RootLayout() {
   }, []);
 
   // Re-read onboarding flag whenever session resolves or changes.
-  // This ensures the guest flow (which sets the flag just before signInAnonymously)
-  // is visible by the time the auth state change fires here.
   useEffect(() => {
     if (session === undefined) return;
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
@@ -82,16 +111,18 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-            animation: 'fade',
-          }}
-        />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+              animation: 'fade',
+            }}
+          />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
