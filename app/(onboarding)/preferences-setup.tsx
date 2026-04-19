@@ -10,6 +10,7 @@ import PreferenceSlider from '../../components/ui/PreferenceSlider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../lib/supabase';
+import { useSiftStore } from '../../store';
 import { defaultPreferences } from '../../lib/utils';
 import type { UserPreferences } from '../../lib/types';
 import { colors } from '../../lib/theme';
@@ -49,6 +50,7 @@ const DIETARY_OPTIONS = [
 
 export default function PreferencesSetupScreen() {
   const router = useRouter();
+  const { setOnboardingDone } = useSiftStore();
   const [prefs, setPrefs] = useState<UserPreferences>(defaultPreferences());
   const [saving, setSaving] = useState(false);
 
@@ -87,6 +89,7 @@ export default function PreferencesSetupScreen() {
         }, { onConflict: 'user_id' });
     }
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    setOnboardingDone(true);
     setSaving(false);
     router.replace('/(tabs)');
   };

@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSiftStore } from '../../store';
 import { colors } from '../../lib/theme';
 
 const ONBOARDING_KEY = 'sift_onboarding_done';
@@ -11,9 +12,11 @@ const ONBOARDING_KEY = 'sift_onboarding_done';
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { setOnboardingDone } = useSiftStore();
 
   const handleSkip = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+    setOnboardingDone(true);
     router.replace('/(tabs)');
   };
 

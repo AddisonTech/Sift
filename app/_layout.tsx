@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { supabase } from '../lib/supabase';
+import { useSiftStore } from '../store';
 import { colors } from '../lib/theme';
 import type { Session } from '@supabase/supabase-js';
 
@@ -35,14 +36,15 @@ class ErrorBoundary extends React.Component<
 
 export default function RootLayout() {
   const segments = useSegments();
+  const { onboardingDone, setOnboardingDone } = useSiftStore();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
+  const [onboardingLoaded, setOnboardingLoaded] = useState(false);
 
   // Hard timeout: force resolution after 4s
   useEffect(() => {
     const timer = setTimeout(() => {
       setSession(s => s === undefined ? null : s);
-      setOnboardingDone(d => d === null ? false : d);
+      setOnboardingLoaded(true);
     }, 4000);
     return () => clearTimeout(timer);
   }, []);
@@ -62,18 +64,20 @@ export default function RootLayout() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Read onboarding flag once session resolves
+  // Seed onboardingDone from AsyncStorage once session resolves
   useEffect(() => {
     if (session === undefined) return;
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
       setOnboardingDone(val === 'true');
+      setOnboardingLoaded(true);
     }).catch(() => {
       setOnboardingDone(false);
+      setOnboardingLoaded(true);
     });
   }, [session]);
 
   // Show blank loading screen until auth + onboarding state are known
-  if (session === undefined || onboardingDone === null) {
+  if (session === undefined || !onboardingLoaded) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
