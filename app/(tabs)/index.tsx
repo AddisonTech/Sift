@@ -8,6 +8,7 @@ import {
   Platform,
   TextInput,
   KeyboardAvoidingView,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -187,6 +188,42 @@ function WebScanScreen() {
             </Pressable>
           )}
         </View>
+
+        {/* Mobile CTA */}
+        <Pressable
+          onPress={() => Linking.openURL('https://sift-seven-chi.vercel.app')}
+          style={({ pressed }) => ({
+            width: '100%',
+            marginTop: 16,
+            backgroundColor: pressed ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.08)',
+            padding: 14,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 14,
+          })}
+        >
+          <Image
+            source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://sift-seven-chi.vercel.app&bgcolor=0d0d0d&color=ffffff&margin=2' }}
+            style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)' }}
+          />
+          <View style={{ flex: 1, gap: 3 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary }} />
+              <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 13, letterSpacing: -0.2 }}>
+                Better on mobile
+              </Text>
+            </View>
+            <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 17 }}>
+              Point your camera at anything — products, food, menus — and get an instant score. Scan the QR code to open on your phone.
+            </Text>
+            <Text style={{ color: `${colors.primary}99`, fontSize: 11, marginTop: 2, fontWeight: '500' }}>
+              sift-seven-chi.vercel.app
+            </Text>
+          </View>
+        </Pressable>
       </View>
 
       {/* Error banner */}

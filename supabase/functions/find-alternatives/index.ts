@@ -33,6 +33,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const PRICE_LEVEL_MAP: Record<string, number> = {
+  PRICE_LEVEL_FREE: 0,
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 4,
+};
+
+function parsePriceLevel(raw: unknown): number | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === 'number') return raw;
+  if (typeof raw === 'string') return PRICE_LEVEL_MAP[raw] ?? null;
+  return null;
+}
+
 function categoryToPlaceTypes(category: string): string[] {
   switch (category) {
     case 'restaurant':
@@ -138,7 +153,7 @@ serve(async (req: Request) => {
             distance_km: Math.round(distKm * 10) / 10,
             address: place.formattedAddress ?? '',
             rating: place.rating ?? null,
-            price_level: place.priceLevel ?? null,
+            price_level: parsePriceLevel(place.priceLevel),
             place_id: place.id ?? '',
           });
         }

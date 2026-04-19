@@ -36,6 +36,19 @@ export function useAnalyzePipeline() {
           } catch {
             // location is optional — continue without it
           }
+        } else if (typeof navigator !== 'undefined' && navigator.geolocation) {
+          try {
+            const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                timeout: 6000,
+                maximumAge: 120000,
+                enableHighAccuracy: false,
+              }),
+            );
+            location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          } catch {
+            // location is optional — continue without it
+          }
         }
 
         const { data: analysisData, error: analysisError } = await supabase.functions.invoke(
@@ -44,7 +57,13 @@ export function useAnalyzePipeline() {
         );
 
         if (analysisError || !analysisData) {
-          throw new Error(analysisError?.message ?? 'Analysis failed');
+          let detail = analysisError?.message ?? 'Analysis failed';
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const body = await (analysisError as any)?.context?.json?.();
+            if (body?.error) detail = body.error;
+          } catch { /* ignore */ }
+          throw new Error(detail);
         }
 
         const { data: altData } = await supabase.functions.invoke('find-alternatives', {
