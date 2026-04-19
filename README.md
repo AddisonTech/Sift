@@ -15,7 +15,7 @@
 
 ---
 
-Sift is a personal decision engine. Scan any product, restaurant, or food item with your camera and get back an AI-powered score (0–100), a confident verdict, and smarter local and online alternatives — all weighted by what actually matters to you.
+Sift is a personal decision engine. Scan any product, restaurant, or food item with your camera and get back an AI-powered score (0-100), a confident verdict, and smarter local and online alternatives, all weighted by what actually matters to you.
 
 ## Screenshots
 
@@ -25,16 +25,16 @@ Sift is a personal decision engine. Scan any product, restaurant, or food item w
 
 ## Features
 
-- **Camera scan** — point at anything and capture. Sift identifies it instantly.
-- **AI scoring** — every item gets a 0–100 score weighted by your preferences (price, quality, ethics, health, speed).
-- **Confident verdicts** — Buy/Skip for products, Go/Pass for restaurants. No hedging.
-- **Score breakdown** — see how each dimension contributed to the final score.
-- **Nearby alternatives** — local places within your radius, ranked by distance.
-- **Online alternatives** — price comparisons with direct purchase links.
-- **Preference engine** — set your weights once; every scan reflects them automatically.
-- **Scan history** — every decision saved, searchable, with timestamps.
-- **Guest mode** — works without an account.
-- **Dark mode** — premium dark UI throughout.
+- **Camera scan** - point at anything and capture. Sift identifies it instantly.
+- **AI scoring** - every item gets a 0-100 score weighted by your preferences (price, quality, ethics, health, speed).
+- **Confident verdicts** - Buy/Skip for products, Go/Pass for restaurants. No hedging.
+- **Score breakdown** - see how each dimension contributed to the final score.
+- **Nearby alternatives** - local places within your radius, ranked by distance.
+- **Online alternatives** - price comparisons with direct purchase links.
+- **Preference engine** - set your weights once; every scan reflects them automatically.
+- **Scan history** - every decision saved, searchable, with timestamps.
+- **Guest mode** - works without an account.
+- **Dark mode** - premium dark UI throughout.
 
 ## Architecture
 
@@ -80,7 +80,7 @@ All API keys live in Supabase edge function secrets. Nothing sensitive is bundle
 | State | Zustand |
 | AI Vision | Google Gemini 2.5 Flash |
 | Local search | Google Places API (New) |
-| Price comparison | Serper.dev — Google Shopping |
+| Price comparison | Serper.dev - Google Shopping |
 | Backend | Supabase (Auth, Postgres, Edge Functions, Storage) |
 | Language | TypeScript (strict) |
 
@@ -165,7 +165,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 ### 3. Set up Supabase
 
-**Database schema** — run the migration in your Supabase SQL editor:
+**Database schema** - run the migration in your Supabase SQL editor:
 
 ```bash
 # Using Supabase CLI
@@ -174,12 +174,12 @@ supabase db push
 # Or copy-paste supabase/migrations/001_initial.sql into the Supabase SQL editor
 ```
 
-**Edge function secrets** — set these in your Supabase project dashboard under Project Settings → Edge Functions:
+**Edge function secrets** - set these in your Supabase project dashboard under Project Settings > Edge Functions:
 
 | Secret | Where to get it |
 |--------|----------------|
 | `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/app/apikey) |
-| `GOOGLE_PLACES_KEY` | [Google Cloud Console](https://console.cloud.google.com) — enable Places API (New) |
+| `GOOGLE_PLACES_KEY` | [Google Cloud Console](https://console.cloud.google.com) - enable Places API (New) |
 | `SERPER_API_KEY` | [Serper.dev](https://serper.dev) |
 
 **Deploy edge functions:**
@@ -217,18 +217,18 @@ Edge function secrets (set in Supabase dashboard, not `.env`):
 | Secret | Required | Description |
 |--------|----------|-------------|
 | `GEMINI_API_KEY` | ✅ | Google Gemini API key for vision analysis |
-| `GOOGLE_PLACES_KEY` | ⚠️ | Google Places API key — local alternatives only work with this |
-| `SERPER_API_KEY` | ⚠️ | Serper API key — online alternatives only work with this |
+| `GOOGLE_PLACES_KEY` | ⚠️ | Google Places API key - local alternatives only work with this |
+| `SERPER_API_KEY` | ⚠️ | Serper API key - online alternatives only work with this |
 
-The app functions without Places and Serper keys — those features just return empty results.
+The app functions without Places and Serper keys; those features just return empty results.
 
 ## Database Schema
 
 The Supabase schema has three main tables:
 
-- **`profiles`** — user display name and avatar, linked to auth.users
-- **`user_preferences`** — per-user scoring weights, dietary filters, budget, radius
-- **`scans`** — every scan result including score, verdict, reasoning, and alternatives (stored as JSONB)
+- **`profiles`** - user display name and avatar, linked to auth.users
+- **`user_preferences`** - per-user scoring weights, dietary filters, budget, radius
+- **`scans`** - every scan result including score, verdict, reasoning, and alternatives (stored as JSONB)
 
 Row-level security is enabled on all tables.
 

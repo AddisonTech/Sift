@@ -126,7 +126,7 @@ export default function ResultsScreen() {
   const handleShare = async () => {
     if (!scan) return;
     await Share.share({
-      message: `I scanned "${scan.item_name}" with Sift — ${scan.score}/100 · ${scan.verdict.toUpperCase()}. "${scan.reasoning}"`,
+      message: `I scanned "${scan.item_name}" with Sift: ${scan.score}/100 · ${scan.verdict.toUpperCase()}. "${scan.reasoning}"`,
     });
   };
 

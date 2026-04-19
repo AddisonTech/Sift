@@ -217,7 +217,7 @@ function WebScanScreen() {
               </Text>
             </View>
             <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, lineHeight: 17 }}>
-              Point your camera at anything — products, food, menus — and get an instant score. Scan the QR code to open on your phone.
+              Point your camera at anything - products, food, menus - and get an instant score. Scan the QR code to open on your phone.
             </Text>
             <Text style={{ color: `${colors.primary}99`, fontSize: 11, marginTop: 2, fontWeight: '500' }}>
               sift-seven-chi.vercel.app
@@ -246,7 +246,7 @@ function WebScanScreen() {
         </View>
       )}
 
-      {/* Bottom button — matches camera shutter position */}
+      {/* Bottom button - matches camera shutter position */}
       <View
         style={{
           position: 'absolute',
@@ -371,8 +371,12 @@ function MobileScanScreen() {
       withTiming(0, { duration: 240 }),
     );
     setScanError(null);
-    const base64 = await cameraRef.current.capturePhoto();
-    await analyze({ imageBase64: base64, mimeType: 'image/jpeg' }, setScanError);
+    try {
+      const base64 = await cameraRef.current.capturePhoto();
+      await analyze({ imageBase64: base64, mimeType: 'image/jpeg' }, setScanError);
+    } catch (err) {
+      setScanError(err instanceof Error ? err.message : 'Capture failed. Try again.');
+    }
   }, [isAnalyzing, analyze]);
 
   return (

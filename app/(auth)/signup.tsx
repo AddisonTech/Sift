@@ -73,7 +73,7 @@ export default function SignupScreen() {
     if (authError) {
       setError(authError.message);
     }
-    // Email confirmation is disabled — auth state fires immediately,
+    // Email confirmation is disabled; auth state fires immediately,
     // _layout.tsx picks up the new session and routes to onboarding.
   };
 

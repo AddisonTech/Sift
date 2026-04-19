@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
             maxWidth: 300,
           }}
         >
-          Point your camera at anything — food, products, restaurants. Get a score, a verdict, and smarter alternatives.
+          Point your camera at anything: food, products, restaurants. Get a score, a verdict, and smarter alternatives.
         </Text>
 
         {/* CTAs */}

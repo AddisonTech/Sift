@@ -47,8 +47,11 @@ serve(async (req: Request) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  console.log('[analyze-item] request received', req.method);
+
   const authHeader = req.headers.get('authorization');
   if (!authHeader) {
+    console.log('[analyze-item] missing auth header');
     return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 401,
@@ -56,13 +59,20 @@ serve(async (req: Request) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: authHeader } },
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  console.log('[analyze-item] supabaseUrl present:', !!supabaseUrl, '| serviceKey present:', !!supabaseServiceKey);
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
+  console.log('[analyze-item] calling getUser with jwt length:', jwt.length);
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser(jwt);
+  console.log('[analyze-item] getUser result - user:', user?.id ?? 'null', '| error:', authError?.message ?? 'none');
+
   if (authError || !user) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    return new Response(JSON.stringify({ error: 'Unauthorized', detail: authError?.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 401,
     });
@@ -71,12 +81,14 @@ serve(async (req: Request) => {
   try {
     const body: RequestBody = await req.json();
     const { imageBase64, mimeType, textQuery, preferences } = body;
+    console.log('[analyze-item] body parsed - textQuery:', textQuery ?? 'none', '| hasImage:', !!imageBase64, '| preferences:', !!preferences);
 
     if (!textQuery && (!imageBase64 || !mimeType)) {
       throw new Error('Either textQuery or imageBase64 + mimeType must be provided');
     }
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    console.log('[analyze-item] geminiApiKey present:', !!geminiApiKey, '| length:', geminiApiKey?.length ?? 0);
     if (!geminiApiKey) {
       throw new Error('GEMINI_API_KEY not configured');
     }
@@ -87,11 +99,11 @@ Based on the user's preferences (weights 1-10: price=${preferences.price_weight}
 
 Return ONLY valid JSON matching this schema:
 {
-  "item_name": "string — specific name, brand if visible",
+  "item_name": "string - specific name, brand if visible",
   "item_category": "product|restaurant|food|service|other",
   "base_score": number (0-100, weighted by user preferences),
   "verdict": "Buy|Skip|Go|Pass|Watch",
-  "reasoning": "string — 1-3 punchy sentences, no fluff, confident tone",
+  "reasoning": "string - 1-3 punchy sentences, no fluff, confident tone",
   "score_breakdown": {
     "price": number,
     "quality": number,
@@ -99,7 +111,7 @@ Return ONLY valid JSON matching this schema:
     "health": number,
     "speed": number
   },
-  "search_query": "string — a good search query to find online alternatives"
+  "search_query": "string - a good search query to find online alternatives"
 }
 
 Verdict rules:
@@ -114,6 +126,7 @@ Verdict rules:
           { inlineData: { mimeType, data: imageBase64 } },
         ];
 
+    console.log('[analyze-item] calling Gemini API');
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
       {
@@ -129,13 +142,16 @@ Verdict rules:
       },
     );
 
+    console.log('[analyze-item] Gemini response status:', geminiResponse.status);
     if (!geminiResponse.ok) {
       const errText = await geminiResponse.text();
-      throw new Error(`Gemini API error: ${geminiResponse.status} — ${errText}`);
+      console.log('[analyze-item] Gemini error body:', errText.slice(0, 500));
+      throw new Error(`Gemini API error: ${geminiResponse.status} - ${errText.slice(0, 200)}`);
     }
 
     const geminiData = await geminiResponse.json();
     const rawText: string = geminiData.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    console.log('[analyze-item] rawText length:', rawText.length, '| preview:', rawText.slice(0, 100));
 
     if (!rawText) {
       const finishReason = geminiData.candidates?.[0]?.finishReason ?? 'unknown';
@@ -151,12 +167,14 @@ Verdict rules:
       }
     }
 
+    console.log('[analyze-item] success - item:', analysis.item_name, '| score:', analysis.base_score);
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
+    console.log('[analyze-item] caught error:', message);
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

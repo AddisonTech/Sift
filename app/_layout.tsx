@@ -1,7 +1,7 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
+import { Stack, Redirect, useSegments } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -34,13 +34,11 @@ class ErrorBoundary extends React.Component<
 }
 
 export default function RootLayout() {
-  const router = useRouter();
   const segments = useSegments();
-  const rootNavState = useRootNavigationState();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
 
-  // Hard timeout: if still loading after 4s, treat as unauthenticated
+  // Hard timeout: force resolution after 4s
   useEffect(() => {
     const timer = setTimeout(() => {
       setSession(s => s === undefined ? null : s);
@@ -49,7 +47,7 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Subscribe to auth state changes
+  // Subscribe to auth state
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
@@ -64,7 +62,7 @@ export default function RootLayout() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // Re-read onboarding flag whenever session resolves or changes.
+  // Read onboarding flag once session resolves
   useEffect(() => {
     if (session === undefined) return;
     AsyncStorage.getItem(ONBOARDING_KEY).then((val) => {
@@ -74,29 +72,7 @@ export default function RootLayout() {
     });
   }, [session]);
 
-  // Routing guard
-  useEffect(() => {
-    if (!rootNavState?.key) return;
-    if (session === undefined || onboardingDone === null) return;
-
-    const inAuth = segments[0] === '(auth)';
-    const inOnboarding = segments[0] === '(onboarding)';
-
-    if (!session) {
-      if (!inAuth) router.replace('/(auth)/login');
-      return;
-    }
-
-    if (!onboardingDone) {
-      if (!inOnboarding) router.replace('/(onboarding)/welcome');
-      return;
-    }
-
-    if (inAuth || inOnboarding) {
-      router.replace('/(tabs)');
-    }
-  }, [rootNavState?.key, session, onboardingDone, segments]);
-
+  // Show blank loading screen until auth + onboarding state are known
   if (session === undefined || onboardingDone === null) {
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -105,6 +81,23 @@ export default function RootLayout() {
         </SafeAreaProvider>
       </GestureHandlerRootView>
     );
+  }
+
+  // Compute redirect target declaratively - avoids router.replace() timing issues in SPA mode
+  const inAuth = segments[0] === '(auth)';
+  const inOnboarding = segments[0] === '(onboarding)';
+  // At root = initial SPA load before any navigation, segments is []
+  const atRoot = segments.length === 0;
+
+  let redirectTo: string | null = null;
+  if (!session && !inAuth) {
+    redirectTo = '/(auth)/login';
+  } else if (session && !onboardingDone && !inOnboarding) {
+    redirectTo = '/(onboarding)/welcome';
+  } else if (session && onboardingDone && (inAuth || inOnboarding || atRoot)) {
+    // Redirect to tabs from wrong groups or from the bare root.
+    // Leave /results and any other valid app routes alone.
+    redirectTo = '/(tabs)';
   }
 
   return (
@@ -118,6 +111,7 @@ export default function RootLayout() {
               animation: 'none',
             }}
           />
+          {redirectTo && <Redirect href={redirectTo as any} />}
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </ErrorBoundary>

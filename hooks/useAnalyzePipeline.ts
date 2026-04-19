@@ -34,7 +34,7 @@ export function useAnalyzePipeline() {
               location = { lat: loc.coords.latitude, lng: loc.coords.longitude };
             }
           } catch {
-            // location is optional — continue without it
+            // location is optional - continue without it
           }
         } else if (typeof navigator !== 'undefined' && navigator.geolocation) {
           try {
@@ -47,7 +47,7 @@ export function useAnalyzePipeline() {
             );
             location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           } catch {
-            // location is optional — continue without it
+            // location is optional - continue without it
           }
         }
 

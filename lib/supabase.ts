@@ -10,7 +10,7 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? 'placeholde
 
 const isBrowser = typeof window !== 'undefined';
 
-// During SSR (Node.js static render) window is undefined — provide a no-op
+// During SSR (Node.js static render) window is undefined - provide a no-op
 // so createClient() succeeds. On native use AsyncStorage. On web let Supabase
 // use its built-in localStorage adapter (undefined = default).
 const noopStorage = {
