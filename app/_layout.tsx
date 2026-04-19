@@ -1,7 +1,7 @@
 import '../global.css';
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -36,13 +36,9 @@ class ErrorBoundary extends React.Component<
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
+  const rootNavState = useRootNavigationState();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-  const [navigatorReady, setNavigatorReady] = useState(false);
-
-  useEffect(() => {
-    setNavigatorReady(true);
-  }, []);
 
   // Hard timeout: if still loading after 4s, treat as unauthenticated
   useEffect(() => {
@@ -80,7 +76,8 @@ export default function RootLayout() {
 
   // Routing guard
   useEffect(() => {
-    if (session === undefined || onboardingDone === null || !navigatorReady) return;
+    if (!rootNavState?.key) return;
+    if (session === undefined || onboardingDone === null) return;
 
     const inAuth = segments[0] === '(auth)';
     const inOnboarding = segments[0] === '(onboarding)';
@@ -98,7 +95,7 @@ export default function RootLayout() {
     if (inAuth || inOnboarding) {
       router.replace('/(tabs)');
     }
-  }, [session, onboardingDone, segments, navigatorReady]);
+  }, [rootNavState?.key, session, onboardingDone, segments]);
 
   if (session === undefined || onboardingDone === null) {
     return (
