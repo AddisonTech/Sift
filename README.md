@@ -19,9 +19,7 @@ Sift is a personal decision engine. Scan any product, restaurant, or food item w
 
 ## Screenshots
 
-| Scan | Results | History | Profile |
-|------|---------|---------|---------|
-| ![Scan](assets/screenshots/scan.png) | ![Results](assets/screenshots/results.png) | ![History](assets/screenshots/history.png) | ![Profile](assets/screenshots/profile.png) |
+See the live demo at **https://sift-seven-chi.vercel.app**
 
 ## Features
 
